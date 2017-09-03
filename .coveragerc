@@ -1,0 +1,4 @@
+[paths]
+source =
+    src/ramda
+    .tox/*/lib/python*/site-packages/ramda
