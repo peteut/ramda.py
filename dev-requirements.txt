@@ -1,5 +1,5 @@
 flake8
 pytest
-pytest-cov
 pytest-flake8
 pytest-describe
+coverage
