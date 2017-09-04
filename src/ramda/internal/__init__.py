@@ -68,6 +68,10 @@ def _curry3(fn):
     return f3
 
 
+def _concat(set1, set2):
+    return set1 + set2
+
+
 def _arity(n, fn):
     if n == 0:
         return lambda: fn()
@@ -119,3 +123,7 @@ def _curry_n(length, received, fn):
         return fn(*combined) if left <= 0 else \
             _arity(left, _curry_n(length, combined, fn))
     return _fn
+
+
+def _is_integer(x):
+    return isinstance(x, int)
