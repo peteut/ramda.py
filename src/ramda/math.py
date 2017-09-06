@@ -1,7 +1,8 @@
 from fastnumbers import fast_real
 from .internal import _curry1, _curry2, _is_integer
 
-__all__ = ["add", "dec", "divide", "inc", "math_mod", "mean"]
+__all__ = ["add", "dec", "divide", "inc", "math_mod", "mean", "multiply",
+           "negate"]
 
 
 @_curry2
@@ -38,3 +39,13 @@ def mean(xs):
         return sum(xs) / len(xs)
     except ZeroDivisionError:
         return float('nan')
+
+
+@_curry2
+def multiply(a, b):
+    return a * b
+
+
+@_curry1
+def negate(n):
+    return -n

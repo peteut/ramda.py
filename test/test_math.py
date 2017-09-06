@@ -105,3 +105,24 @@ def describe_mean():
 
     def it_returns_None_for_an_empty_list():
         eq(R.identical(float('nan'), R.mean([])), True)
+
+
+def describe_multiply():
+
+    def it_multiplies_together_two_numbers():
+        eq(R.multiply(6, 7), 42)
+
+    def it_is_curried():
+        dbl = R.multiply(2)
+        eq(dbl(15), 30)
+
+
+def describe_negate():
+
+    def it_negates_its_argument():
+        eq(R.negate(float('-inf')), float('inf'))
+        eq(R.negate(-1), 1)
+        eq(R.negate(-0), 0)
+        eq(R.negate(0), -0)
+        eq(R.negate(1), -1)
+        eq(R.negate(float('inf')), float('-inf'))
