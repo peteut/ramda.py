@@ -2,11 +2,11 @@ import inspect
 import collections
 import functools
 import builtins
-from .internal import _curry2
+from .internal import _curry2, _curry3, _reduce
 from .function import curry_n
 
 
-__all__ = ["map"]
+__all__ = ["map", "reduce"]
 
 
 @_curry2
@@ -21,3 +21,6 @@ def map(fn, functor):
             functor.keys(), {})
     else:
         return list(builtins.map(fn, functor))
+
+
+reduce = _curry3(_reduce)

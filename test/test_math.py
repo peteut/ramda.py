@@ -126,3 +126,42 @@ def describe_negate():
         eq(R.negate(0), -0)
         eq(R.negate(1), -1)
         eq(R.negate(float('inf')), float('-inf'))
+
+
+def describe_product():
+
+    def it_multiplies_together_the_array_of_numbers_supplied():
+        eq(R.product([1, 2, 3, 4]), 24)
+
+
+def describe_subtract():
+
+    def it_subtracts_two_numbers():
+        eq(R.subtract(22, 7), 15)
+
+    def it_coerces_its_arguments_to_numbers():
+        eq(R.subtract('1', '2'), -1)
+        eq(R.subtract(1, '2'), -1)
+        eq(R.subtract(True, False), 1)
+        # eq(R.subtract(null, null), 0)
+        eq(R.identical(R.subtract(None, None), float('nan')), True)
+        # eq(R.subtract(new Date(1), new Date(2)), -1)
+
+    def it_is_curried():
+        nines_compl = R.subtract(9)
+        eq(nines_compl(6), 3)
+
+    def it_behaves_right_curried_when_passed_a_placeholder_for_its_first_argument():
+        minus5 = R.subtract(R.__, 5)
+        eq(minus5(17), 12)
+
+
+def describe_sum():
+
+    def it_adds_together_the_array_of_numbers_supplied():
+        eq(R.sum([1, 2, 3, 4]), 10)
+
+    def it_does_not_save_the_state_of_the_accumulator():
+        eq(R.sum([1, 2, 3, 4]), 10)
+        eq(R.sum([1]), 1)
+        eq(R.sum([5, 5, 5, 5, 5]), 25)

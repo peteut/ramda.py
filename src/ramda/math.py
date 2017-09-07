@@ -1,8 +1,9 @@
 from fastnumbers import fast_real
 from .internal import _curry1, _curry2, _is_integer
+from .list import reduce
 
 __all__ = ["add", "dec", "divide", "inc", "math_mod", "mean", "multiply",
-           "negate"]
+           "negate", "product", "subtract", "sum"]
 
 
 @_curry2
@@ -49,3 +50,17 @@ def multiply(a, b):
 @_curry1
 def negate(n):
     return -n
+
+
+product = reduce(multiply, 1)
+
+
+@_curry2
+def subtract(a, b):
+    try:
+        return fast_real(a) - fast_real(b)
+    except TypeError:
+        return float('nan')
+
+
+sum = reduce(add, 0)

@@ -1,3 +1,7 @@
+import inspect
+import collections
+
+
 class _Placeholder():
     pass
 
@@ -127,3 +131,40 @@ def _curry_n(length, received, fn):
 
 def _is_integer(x):
     return isinstance(x, int)
+
+
+def _xwrap(fn):
+    class _XWrap():
+        def __init__(self, fn):
+            self.f = fn
+
+        @staticmethod
+        def _transducer_init():
+            raise NotImplementedError("init not implemented in Xwrap")
+
+        @staticmethod
+        def _transducer_result(acc):
+            return acc
+
+        def _transducer_step(self, acc, x):
+            return self.f(acc, x)
+
+    return _XWrap(fn)
+
+
+def _reduce(fn, acc, xs):
+    def _iterable_reduce(xf, acc, iterable):
+        for step in iterable:
+            acc = xf._transducer_step(acc, step)
+            if acc and getattr(acc, "_transducer_reduced", False):
+                acc = acc._transducer_value
+                break
+        return xf._transducer_result(acc)
+
+    if inspect.isfunction(fn):
+        fn = _xwrap(fn)
+
+    if isinstance(xs, collections.Iterable):
+        return _iterable_reduce(fn, acc, xs)
+
+    raise ValueError("reduce: xs must be an iterable")
