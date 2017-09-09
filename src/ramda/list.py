@@ -6,7 +6,18 @@ from .internal import _curry2, _curry3, _reduce
 from .function import curry_n
 
 
-__all__ = ["map", "reduce"]
+__all__ = ["adjust", "map", "reduce"]
+
+
+@_curry3
+def adjust(fn, idx, xs):
+    if idx >= len(xs) or idx < -len(xs):
+        return xs
+    start = len(xs) if idx < 0 else 0
+    _idx = start + idx
+    _xs = xs[:]
+    _xs[_idx] = fn(xs[_idx])
+    return _xs
 
 
 @_curry2
