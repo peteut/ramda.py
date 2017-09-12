@@ -1,5 +1,6 @@
 import inspect
 import collections
+import types
 
 
 class _Placeholder():
@@ -168,3 +169,61 @@ def _reduce(fn, acc, xs):
         return _iterable_reduce(fn, acc, xs)
 
     raise ValueError("reduce: xs must be an iterable")
+
+
+def _reduced(x):
+    return x if x and getattr(x, "_transducer_reduced", None) else \
+        types.SimpleNamespace(_transducer_value=x, _transducer_reduced=True)
+
+
+class _XFBase():
+    def init(self):
+        return self.xf._transducer_init()
+
+    def result(self, result):
+        return self.xf._transducer_result(result)
+
+
+@_curry2
+def _xall(f, xf):
+    class _Xall(_XFBase):
+        def __init__(self, f, xf):
+            self.xf = xf
+            self.f = f
+            self.all = True
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            if self.all:
+                result = self.xf._transducer_step(result, True)
+            return self.xf._transduer_result(result)
+
+        def _transducer_step(self, result, input):
+            if not self.f(input):
+                self.all = False
+                result = _reduced(self._transducer_step(result, False))
+            return result
+    return _Xall(f, xf)
+
+
+def _is_transformer(obj):
+    return inspect.isfunction(getattr(obj, "_transducer_step", None))
+
+
+@_curry3
+def _dispatchable(method_names, xf, fn):
+    def _fn(*args):
+        if len(args) == 0:
+            return fn()
+        obj = args[-1]
+        if not isinstance(obj, collections.Iterable):
+            for method_name in method_names:
+                if getattr(obj, method_name, None):
+                    return getattr(obj, method_name)(obj, *args[:1])
+        if _is_transformer(obj):
+            transducer = xf(*args[:1])
+            return transducer(obj)
+        return fn(*args)
+    return _fn

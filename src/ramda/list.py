@@ -2,11 +2,11 @@ import inspect
 import collections
 import functools
 import builtins
-from .internal import _curry2, _curry3, _reduce
+from .internal import _curry2, _curry3, _reduce, _dispatchable, _xall
 from .function import curry_n
 
 
-__all__ = ["adjust", "map", "reduce"]
+__all__ = ["adjust", "all", "map", "reduce"]
 
 
 @_curry3
@@ -18,6 +18,12 @@ def adjust(fn, idx, xs):
     _xs = xs[:]
     _xs[_idx] = fn(xs[_idx])
     return _xs
+
+
+@_curry2
+@_dispatchable(["all"], _xall)
+def all(fn, xs):
+    return builtins.all(map(fn, xs))
 
 
 @_curry2
