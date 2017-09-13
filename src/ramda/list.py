@@ -3,12 +3,12 @@ import collections
 import copy
 import functools
 import builtins
-from .internal import _curry2, _curry3, _reduce, _dispatchable, _xall, \
-    _is_transformer, _step_cat, _xmap, _xfilter
+from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
+    _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter
 from .function import curry_n
 
 
-__all__ = ["adjust", "filter", "all", "map", "reduce", "into"]
+__all__ = ["adjust", "filter", "all", "map", "reduce", "into", "tail"]
 
 
 @_curry3
@@ -63,3 +63,9 @@ def into(acc, xf, xs):
     if _is_transformer(acc):
         return _reduce(xf(acc), acc._transducer_init(), xs)
     return _reduce(xf(_step_cat(acc)), copy.copy(acc), xs)
+
+
+@_curry1
+@_check_for_method("tail")
+def tail(xs):
+    return xs[1:]

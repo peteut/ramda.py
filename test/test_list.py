@@ -147,3 +147,21 @@ def describe_filter():
     def it_is_curried(even):
         only_even = R.filter(even)
         eq(only_even([1, 2, 3, 4, 5, 6, 7]), [2, 4, 6])
+
+
+def describe_tail():
+
+    def it_returns_the_tail_of_an_ordered_collection():
+        eq(R.tail([1, 2, 3]), [2, 3])
+        eq(R.tail([2, 3]), [3])
+        eq(R.tail([3]), [])
+        eq(R.tail([]), [])
+
+        eq(R.tail("abc"), "bc")
+        eq(R.tail("bc"), "c")
+        eq(R.tail("c"), "")
+        eq(R.tail(""), "")
+
+    def it_throws_if_applied_to_null_or_undefined():
+        with pytest.raises(TypeError):
+            R.tail(None)
