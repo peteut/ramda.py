@@ -5,7 +5,7 @@ from ramda.shared import eq
 from .common import list_xf
 
 
-def describe_adjuxt():
+def describe_adjust():
 
     @pytest.fixture
     def xs():
