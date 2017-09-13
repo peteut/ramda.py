@@ -2,7 +2,7 @@ import types
 import pytest
 import ramda as R
 from ramda.shared import eq
-from .common import list_xf
+from .common import list_xf, get_arity
 
 
 def describe_adjust():
@@ -115,6 +115,47 @@ def describe_all():
     def it_is_curried(even):
         test = lambda n: even(n)
         eq(R.all(test)([2, 4, 6, 7, 8, 10]), False)
+
+
+def describe_map():
+
+    @pytest.fixture
+    def times2():
+        return lambda x: x * 2
+
+    @pytest.fixture
+    def add1():
+        return lambda x: x + 1
+
+    @pytest.fixture
+    def dec():
+        return lambda x: x - 1
+
+    def it_maps_simple_functions_over_arrays(times2):
+        eq(R.map(times2, [1, 2, 3, 4]), [2, 4, 6, 8])
+
+    def it_maps_over_objects(dec):
+        eq(R.map(dec, {}), {})
+        eq(R.map(dec, {"x": 4, "y": 5, "z": 6}), {"x": 3, "y": 4, "z": 5})
+
+    def it_interprets_function_as_a_functor():
+        f = lambda a: a - 1
+        g = lambda b: b * 2
+        h = R.map(f, g)
+        eq(h(10), (10 * 2) - 1)
+
+    def it_composes(times2, dec):
+        mdouble = R.map(times2)
+        mdec = R.map(dec)
+        eq(mdec(mdouble([10, 20, 30])), [19, 39, 59])
+
+    def it_is_curried(add1):
+        inc = R.map(add1)
+        eq(inc([1, 2, 3]), [2, 3, 4])
+
+    def it_correctly_reports_the_arity_of_curried_versions(add1):
+        inc = R.map(add1)
+        eq(get_arity(inc), 1)
 
 
 def describe_filter():
