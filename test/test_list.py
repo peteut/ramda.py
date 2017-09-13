@@ -1,3 +1,4 @@
+import types
 import pytest
 import ramda as R
 from ramda.shared import eq
@@ -28,6 +29,44 @@ def describe_adjuxt():
         eq(R.adjust(R.add(1))(2)([0, 1, 2, 3]), [0, 1, 3, 3])
 
 
+def describe_into():
+
+    @pytest.fixture
+    def add():
+        return R.add
+
+    @pytest.fixture
+    def is_odd():
+        return lambda b: b % 2 == 1
+
+    @pytest.fixture
+    def add_xf():
+        return types.SimpleNamespace(
+            _transducer_init=R.always(0),
+            _transducer_step=R.add,
+            _transducer_result=R.identity)
+
+    def it_transduces_into_arrays(add, is_odd):
+        eq(R.into([], R.map(add(1)), [1, 2, 3, 4]), [2, 3, 4, 5])
+        eq(R.into([], R.filter(is_odd), [1, 2, 3, 4]), [1, 3])
+        # eq(R.into([], R.compose(R.map(add(1)), R.take(2)), [1, 2, 3, 4]), [2, 3])
+
+    def it_transduces_into_strings(add, is_odd):
+        eq(R.into("", R.map(add(1)), [1, 2, 3, 4]), "2345")
+        eq(R.into("", R.filter(is_odd), [1, 2, 3, 4]), "13")
+        # eq(R.into("", R.compose(R.map(add(1)), R.take(2)), [1, 2, 3, 4]), "23")
+
+    def it_transduces_into_objects():
+        eq(R.into({}, R.identity, [["a", 1], ["b", 2]]), {"a": 1, "b": 2})
+        eq(R.into({}, R.identity, [{"a": 1}, {"b": 2, "c": 3}]),
+           {"a": 1, "b": 2, "c": 3})
+
+    def it_dispatches_to_objects_that_implement_reduce_function(add, is_odd):
+        obj = {"x": [1, 2, 3], "reduce": lambda *_: "override"}
+        eq(R.into([], R.map(add(1)), obj), "override")
+        eq(R.into([], R.filter(is_odd), obj), "override")
+
+
 def describe_all():
 
     @pytest.fixture
@@ -42,6 +81,10 @@ def describe_all():
     def is_false():
         return lambda x: x is False
 
+    @pytest.fixture
+    def into_array():
+        return R.into([])
+
     def it_returns_true_if_all_elements_satisfy_the_predicate(even, is_false):
         eq(R.all(even, [2, 4, 6, 8, 10, 12]), True)
         eq(R.all(is_false, [False, False, False]), True)
@@ -49,11 +92,16 @@ def describe_all():
     def it_returns_false_if_any_element_fails_to_satisfy_the_predicate(even):
         eq(R.all(even, [2, 4, 6, 8, 9, 10]), False)
 
+    def it_returns_true_into_array_if_all_elements_satisfy_the_predicate(
+            even, is_false, into_array):
+        eq(into_array(R.all(even), [2, 4, 6, 8, 10, 12]), [True])
+        eq(into_array(R.all(is_false), [False, False, False]), [True])
+
     def it_returns_true_for_an_empty_list(T):
         eq(R.all(T, []), True)
 
     def it_works_with_more_complex_objects():
-        xs = [{"x": 'abc'}, {"x": 'ade'}, {"x": 'fghiajk'}]
+        xs = [{"x": "abc"}, {"x": "ade"}, {"x": "fghiajk"}]
         len_3 = lambda o: len(o["x"]) == 3
         has_a = lambda o: o["x"].find("a") > -1
         eq(R.all(len_3, xs), False)
@@ -67,3 +115,35 @@ def describe_all():
     def it_is_curried(even):
         test = lambda n: even(n)
         eq(R.all(test)([2, 4, 6, 7, 8, 10]), False)
+
+
+def describe_filter():
+
+    @pytest.fixture
+    def even():
+        return lambda n: n % 2 == 0
+
+    def it_reduces_an_array_to_those_matching_a_filter(even):
+        eq(R.filter(even, [1, 2, 3, 4, 5]), [2, 4])
+
+    def it_returns_an_empty_array_if_no_element_matches():
+        eq(R.filter(lambda x: x > 100, [1, 9, 99]), [])
+
+    def it_returns_an_empty_array_if_asked_to_filter_an_empty_array():
+        eq(R.filter(lambda x: x > 100, []), [])
+
+    def it_filters_objects():
+        positive = lambda x: x > 0
+        eq(R.filter(positive, {}), {})
+        eq(R.filter(positive, {"x": 0, "y": 0, "z": 0}), {})
+        eq(R.filter(positive, {"x": 1, "y": 0, "z": 0}), {"x": 1})
+        eq(R.filter(positive, {"x": 1, "y": 2, "z": 0}), {"x": 1, "y": 2})
+        eq(R.filter(positive, {"x": 1, "y": 2, "z": 3}), {"x": 1, "y": 2, "z": 3})
+
+    def it_dispatches_to_passed_in_non_Array_object_with_a_filter_method():
+        f = {"filter": lambda f: f("called f.filter")}
+        eq(R.filter(R.identity, f), "called f.filter")
+
+    def it_is_curried(even):
+        only_even = R.filter(even)
+        eq(only_even([1, 2, 3, 4, 5, 6, 7]), [2, 4, 6])

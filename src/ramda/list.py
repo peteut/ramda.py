@@ -1,12 +1,14 @@
 import inspect
 import collections
+import copy
 import functools
 import builtins
-from .internal import _curry2, _curry3, _reduce, _dispatchable, _xall
+from .internal import _curry2, _curry3, _reduce, _dispatchable, _xall, \
+    _is_transformer, _step_cat, _xmap, _xfilter
 from .function import curry_n
 
 
-__all__ = ["adjust", "all", "map", "reduce"]
+__all__ = ["adjust", "filter", "all", "map", "reduce", "into"]
 
 
 @_curry3
@@ -27,8 +29,9 @@ def all(fn, xs):
 
 
 @_curry2
+@_dispatchable(["map"], _xmap)
 def map(fn, functor):
-    if inspect.isfunction(functor):
+    if isinstance(functor, collections.Callable):
         return curry_n(
             len(inspect.signature(functor).parameters),
             lambda *args: fn(functor(*args)))
@@ -37,7 +40,26 @@ def map(fn, functor):
             lambda acc, key: collections.ChainMap(acc, {key: fn(functor[key])}),
             functor.keys(), {})
     else:
-        return list(builtins.map(fn, functor))
+        return [fn(x) for x in functor]
+
+
+@_curry2
+@_dispatchable(["filter"], _xfilter)
+def filter(pred, filterable):
+    if isinstance(filterable, collections.Mapping):
+        def _fn(acc, key):
+            if pred(filterable[key]):
+                acc[key] = filterable[key]
+            return acc
+        return _reduce(_fn, {}, filterable.keys())
+    return [x for x in filterable if pred(x)]
 
 
 reduce = _curry3(_reduce)
+
+
+@_curry3
+def into(acc, xf, xs):
+    if _is_transformer(acc):
+        return _reduce(xf(acc), acc._transducer_init(), xs)
+    return _reduce(xf(_step_cat(acc)), copy.copy(acc), xs)

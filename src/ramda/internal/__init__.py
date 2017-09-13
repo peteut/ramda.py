@@ -1,6 +1,6 @@
-import inspect
 import collections
 import types
+import functools
 
 
 class _Placeholder():
@@ -8,6 +8,10 @@ class _Placeholder():
 
 
 __ = _Placeholder()
+
+
+def _assign(target, *args):
+    return functools.reduce(lambda acc, obj: acc.update(obj) or acc, args, target)
 
 
 def _is_placeholder(x):
@@ -162,8 +166,16 @@ def _reduce(fn, acc, xs):
                 break
         return xf._transducer_result(acc)
 
-    if inspect.isfunction(fn):
+    def _method_reduce(xf, acc, obj, method_name):
+        return xf._transducer_result(
+            obj[method_name](xf._transducer_step, acc))
+
+    if isinstance(fn, collections.Callable):
         fn = _xwrap(fn)
+
+    if isinstance(xs, collections.Mapping) and isinstance(
+            xs.get("reduce"), collections.Callable):
+        return _method_reduce(fn, acc, xs, "reduce")
 
     if isinstance(xs, collections.Iterable):
         return _iterable_reduce(fn, acc, xs)
@@ -198,18 +210,64 @@ def _xall(f, xf):
         def _transducer_result(self, result):
             if self.all:
                 result = self.xf._transducer_step(result, True)
-            return self.xf._transduer_result(result)
+            return super().result(result)
 
         def _transducer_step(self, result, input):
             if not self.f(input):
                 self.all = False
                 result = _reduced(self._transducer_step(result, False))
             return result
+
     return _Xall(f, xf)
 
 
+@_curry2
+def _xmap(f, xf):
+    class _XMap(_XFBase):
+        def __init__(self, f, xf):
+            self.xf = xf
+            self.f = f
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            return super().result(result)
+
+        def _transducer_step(self, result, input):
+            return self.xf._transducer_step(result, self.f(input))
+
+    return _XMap(f, xf)
+
+
+@_curry2
+def _xfilter(f, xf):
+    class _XFilter(_XFBase):
+        def __init__(self, f, xf):
+            self.xf = xf
+            self.f = f
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            return super().result(result)
+
+        def _transducer_step(self, result, input):
+            if self.f(input):
+                return self.xf._transducer_step(result, input)
+            return result
+
+    return _XFilter(f, xf)
+
+
 def _is_transformer(obj):
-    return inspect.isfunction(getattr(obj, "_transducer_step", None))
+    return isinstance(
+        getattr(obj, "_transducer_step", None), collections.Callable)
+
+
+def _identity(x):
+    return x
 
 
 @_curry3
@@ -218,12 +276,59 @@ def _dispatchable(method_names, xf, fn):
         if len(args) == 0:
             return fn()
         obj = args[-1]
-        if not isinstance(obj, collections.Iterable):
+        if isinstance(obj, collections.Mapping):
             for method_name in method_names:
-                if getattr(obj, method_name, None):
-                    return getattr(obj, method_name)(obj, *args[:1])
+                if isinstance(obj.get(method_name), collections.Callable):
+                    return obj.get(method_name)(*args[:-1])
         if _is_transformer(obj):
-            transducer = xf(*args[:1])
+            transducer = xf(*args[:-1])
             return transducer(obj)
         return fn(*args)
     return _fn
+
+
+def _step_cat(obj):
+    _step_cat_array = types.SimpleNamespace(
+        _transducer_init=lambda: [],
+        _transducer_step=lambda a, b: a.append(b) or a,
+        _transducer_result=_identity)
+
+    _step_cat_string = types.SimpleNamespace(
+        _transducer_init=lambda: "",
+        _transducer_step=lambda a, b: a + str(b),
+        _transducer_result=_identity)
+
+    _step_cat_obj = types.SimpleNamespace(
+        _transducer_init=lambda: {},
+        _transducer_step=lambda result, input: _assign(
+            result, dict([input[:2]]) if not isinstance(
+                input, collections.Mapping) else input),
+        _transducer_result=_identity)
+
+    if _is_transformer(obj):
+        return obj
+    elif isinstance(obj, collections.Mapping):
+        return _step_cat_obj
+    elif isinstance(obj, str):
+        return _step_cat_string
+    elif isinstance(obj, collections.Iterable):
+        return _step_cat_array
+
+    raise ValueError("Cannot create transformer for {}".format(obj))
+
+
+@_curry2
+def _check_for_method(method_name, fn):
+    def _fn(*args):
+        if len(args) == 0:
+            return fn()
+        obj = args[-1]
+        if not isinstance(obj, collections.Mapping) or \
+                not isinstance(obj.get(method_name), collections.Callable):
+            return fn(*args)
+        return obj.get(method_name)(*args[:-1])
+    return _fn
+
+
+def _pipe(f, g):
+    return lambda *args: g(f(*args))
