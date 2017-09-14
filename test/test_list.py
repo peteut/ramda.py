@@ -49,12 +49,12 @@ def describe_into():
     def it_transduces_into_arrays(add, is_odd):
         eq(R.into([], R.map(add(1)), [1, 2, 3, 4]), [2, 3, 4, 5])
         eq(R.into([], R.filter(is_odd), [1, 2, 3, 4]), [1, 3])
-        # eq(R.into([], R.compose(R.map(add(1)), R.take(2)), [1, 2, 3, 4]), [2, 3])
+        eq(R.into([], R.compose(R.map(add(1)), R.take(2)), [1, 2, 3, 4]), [2, 3])
 
     def it_transduces_into_strings(add, is_odd):
         eq(R.into("", R.map(add(1)), [1, 2, 3, 4]), "2345")
         eq(R.into("", R.filter(is_odd), [1, 2, 3, 4]), "13")
-        # eq(R.into("", R.compose(R.map(add(1)), R.take(2)), [1, 2, 3, 4]), "23")
+        eq(R.into("", R.compose(R.map(add(1)), R.take(2)), [1, 2, 3, 4]), "23")
 
     def it_transduces_into_objects():
         eq(R.into({}, R.identity, [["a", 1], ["b", 2]]), {"a": 1, "b": 2})
