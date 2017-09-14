@@ -206,3 +206,48 @@ def describe_tail():
     def it_throws_if_applied_to_null_or_undefined():
         with pytest.raises(TypeError):
             R.tail(None)
+
+
+def describe_take():
+
+    def it_takes_only_the_first_n_elements_from_a_list():
+        eq(R.take(3, ["a", "b", "c", "d", "e", "f", "g"]), ["a", "b", "c"])
+
+    def it_returns_only_as_many_as_the_array_can_provide():
+        eq(R.take(3, [1, 2]), [1, 2])
+        eq(R.take(3, []), [])
+
+    def it_returns_an_equivalent_list_if_n_is_lt_0():
+        eq(R.take(-1, [1, 2, 3]), [1, 2, 3])
+        eq(R.take(float("-inf"), [1, 2, 3]), [1, 2, 3])
+
+    def it_never_returns_the_input_array():
+        xs = [1, 2, 3]
+        not_equal = lambda a, b: id(a) is not id(b)
+
+        eq(not_equal(R.take(3, xs), xs), True)
+        eq(not_equal(R.take(float("inf"), xs), xs), True)
+        eq(not_equal(R.take(-1, xs), xs), True)
+
+    def it_can_operate_on_strings():
+        eq(R.take(3, "Ramda"), "Ram")
+        eq(R.take(2, "Ramda"), "Ra")
+        eq(R.take(1, "Ramda"), "R")
+        eq(R.take(0, "Ramda"), "")
+
+    def it_handles_zero_correctly():
+        eq(R.into([], R.take(0), [1, 2, 3]), [])
+
+    def it_steps_correct_number_of_times(mocker):
+        spy = types.SimpleNamespace(spy=R.identity)
+        mocker.spy(spy, "spy")
+
+        R.into([], R.compose(R.map(spy.spy), R.take(2)), [1, 2, 3])
+        eq(spy.spy.call_count, 2)
+
+    def it_transducer_called_for_every_member_of_list_if_n_is_lt_0(mocker):
+        spy = types.SimpleNamespace(spy=R.identity)
+        mocker.spy(spy, "spy")
+
+        R.into([], R.compose(R.map(spy.spy), R.take(-1)), [1, 2, 3])
+        eq(spy.spy.call_count, 3)

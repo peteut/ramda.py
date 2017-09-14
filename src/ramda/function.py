@@ -3,7 +3,7 @@ from .internal import _curry1, _curry2, _curry_n, _arity, _concat, _identity, \
     _pipe, _reduce
 
 
-__all__ = ["always", "curry_n", "identity", "always", "pipe"]
+__all__ = ["always", "curry_n", "identity", "always", "pipe", "compose"]
 
 
 
@@ -30,3 +30,9 @@ def pipe(*args):
         raise ValueError("pipe requires at least one argument")
     return _arity(len(inspect.signature(args[0]).parameters),
                   _reduce(_pipe, args[0], tail(args)))
+
+
+def compose(*args):
+    if len(args) == 0:
+        raise ValueError("compose requires at least one argument")
+    return pipe(*reversed(args))
