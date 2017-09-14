@@ -125,7 +125,7 @@ def _curry_n(length, received, fn):
                      len(args_list) == 0):
                 result = received[len(combined)]
             else:
-                result = args_list.pop(-1)
+                result = args_list.pop(0)
             combined.append(result)
             if not _is_placeholder(result):
                 left -= 1
@@ -184,7 +184,7 @@ def _reduce(fn, acc, xs):
 
 
 def _reduced(x):
-    return x if x and getattr(x, "_transducer_reduced", None) else \
+    return x if x and getattr(x, "_transducer_reduced", False) else \
         types.SimpleNamespace(_transducer_value=x, _transducer_reduced=True)
 
 
