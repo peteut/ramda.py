@@ -70,3 +70,28 @@ def describe_pipe():
         g = R.pipe(f)
         eq(get_arity(g), 3)
         eq(g(1, 2, 3), [1, 2, 3])
+
+
+def describe_compose():
+
+    def is_a_variadic_function():
+        eq(inspect.isfunction(R.compose), True)
+        eq(inspect.getargspec(R.compose).args, [])
+
+    def it_performs_right_to_left_function_composition():
+        f = R.compose(R.map, R.multiply, lambda x, base: int(x, base))
+
+        eq(get_arity(f), 2)
+        eq(f("10", 10)([1, 2, 3]), [10, 20, 30])
+        eq(f('10', 2)([1, 2, 3]), [2, 4, 6])
+
+    def it_throws_if_given_no_arguments():
+        with pytest.raises(ValueError,
+                           message="compose requires at least one argument"):
+            R.compose()
+
+    def it_can_be_applied_to_one_argument():
+        f = lambda a, b, c: [a, b, c]
+        g = R.compose(f)
+        eq(get_arity(g), 3)
+        eq(g(1, 2, 3), [1, 2, 3])
