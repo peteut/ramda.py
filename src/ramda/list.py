@@ -6,11 +6,12 @@ import builtins
 import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
-    _xtake
+    _xtake, _curry_n, _xreduce_by
 from .function import curry_n
 
 
-__all__ = ["adjust", "filter", "all", "map", "reduce", "into", "tail", "take"]
+__all__ = ["adjust", "filter", "all", "map", "reduce", "into", "tail", "take",
+           "reduce_by"]
 
 
 @_curry3
@@ -78,3 +79,13 @@ def tail(xs):
 def take(n, xs):
     n = fastnumbers.fast_int(n, -1)
     return xs[:] if n < 0 else xs[:n]
+
+
+@functools.partial(_curry_n, 4, [])
+@_dispatchable([], _xreduce_by)
+def reduce_by(value_fn, value_acc, key_fn, xs):
+    def _fn(acc, elt):
+        key = key_fn(elt)
+        acc[key] = value_fn(acc.get(key, copy.copy(value_acc)), elt)
+        return acc
+    return _reduce(_fn, {}, xs)

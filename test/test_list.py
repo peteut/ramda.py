@@ -6,7 +6,6 @@ from .common import list_xf, get_arity
 
 
 def describe_adjust():
-
     @pytest.fixture
     def xs():
         return [0, 1, 2, 3]
@@ -30,7 +29,6 @@ def describe_adjust():
 
 
 def describe_into():
-
     @pytest.fixture
     def add():
         return R.add
@@ -68,7 +66,6 @@ def describe_into():
 
 
 def describe_all():
-
     @pytest.fixture
     def even():
         return lambda n: n % 2 == 0
@@ -118,7 +115,6 @@ def describe_all():
 
 
 def describe_map():
-
     @pytest.fixture
     def times2():
         return lambda x: x * 2
@@ -159,7 +155,6 @@ def describe_map():
 
 
 def describe_filter():
-
     @pytest.fixture
     def even():
         return lambda n: n % 2 == 0
@@ -191,7 +186,6 @@ def describe_filter():
 
 
 def describe_tail():
-
     def it_returns_the_tail_of_an_ordered_collection():
         eq(R.tail([1, 2, 3]), [2, 3])
         eq(R.tail([2, 3]), [3])
@@ -209,7 +203,6 @@ def describe_tail():
 
 
 def describe_take():
-
     def it_takes_only_the_first_n_elements_from_a_list():
         eq(R.take(3, ["a", "b", "c", "d", "e", "f", "g"]), ["a", "b", "c"])
 
@@ -251,3 +244,68 @@ def describe_take():
 
         R.into([], R.compose(R.map(spy.spy), R.take(-1)), [1, 2, 3])
         eq(spy.spy.call_count, 3)
+
+
+def describe_reduce_by():
+    @pytest.fixture
+    def sum_values():
+        return lambda acc, obj: acc + obj["val"]
+
+    @pytest.fixture
+    def by_type():
+        return lambda x: x["type"]
+
+    @pytest.fixture
+    def sum_input():
+        return [
+            {"type": "A", "val": 10},
+            {"type": "B", "val": 20},
+            {"type": "A", "val": 30},
+            {"type": "A", "val": 40},
+            {"type": "C", "val": 50},
+            {"type": "B", "val": 60}]
+
+    def it_splits_the_list_into_groups_according_to_the_grouping_function():
+        grade = lambda score: "F" if score < 65 else "D" if score < 70 else "C" if score < 80 \
+            else "B" if score < 90 else "A"
+        students = [
+            {"name": "Abby", "score": 84},
+            {"name": "Brad", "score": 73},
+            {"name": "Chris", "score": 89},
+            {"name": "Dianne", "score": 99},
+            {"name": "Eddy", "score": 58},
+            {"name": "Fred", "score": 66},
+            {"name": "Gillian", "score": 91},
+            {"name": "Hannah", "score": 78},
+            {"name": "Irene", "score": 85},
+            {"name": "Jack", "score": 69}]
+        by_grade = lambda student: grade(student.get("score", -1))
+        collect_names = lambda acc, student: acc.append(student["name"]) or acc
+
+        eq(R.reduce_by(collect_names, [], by_grade, students), {
+            "A": ["Dianne", "Gillian"],
+            "B": ["Abby", "Chris", "Irene"],
+            "C": ["Brad", "Hannah"],
+            "D": ["Fred", "Jack"],
+            "F": ["Eddy"]})
+
+    def it_returns_an_empty_object_if_given_an_empty_array(sum_values, by_type):
+        eq(R.reduce_by(sum_values, 0, by_type, []), {})
+
+    def it_is_curried(sum_input, sum_values, by_type):
+        reduce_to_sums_by = R.reduce_by(sum_values, 0)
+        sum_by_type = reduce_to_sums_by(by_type)
+        eq(sum_by_type(sum_input), {"A": 80, "B": 80, "C": 50})
+
+    def it_correctly_reports_the_arity_of_curried_versions(sum_values, by_type):
+        inc = R.reduce_by(sum_values, 0)(by_type)
+        eq(get_arity(inc), 1)
+
+    def it_can_act_as_a_transducer(sum_values, by_type, sum_input):
+        reduce_to_sums_by = R.reduce_by(sum_values, 0)
+        sum_by_type = reduce_to_sums_by(by_type)
+        eq(R.into(
+            {},
+            R.compose(sum_by_type, R.map(R.adjust(R.multiply(10), 1))),
+            sum_input),
+            {"A": 800, "B": 800, "C": 500})
