@@ -37,10 +37,6 @@ def concat(a, b):
         if isinstance(b, collections.Sequence):
             return a + b
         raise TypeError("{} is not an array".format(b))
-    if isinstance(a, str):
-        if isinstance(b, str):
-            return a + b
-        raise TypeError("{} is ont a string".format(b))
     if hasattr(a, "concat"):
         return a.concat(b)
     raise TypeError("{} does not have a method named \"concat\"".format(a))
