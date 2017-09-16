@@ -6,12 +6,12 @@ import builtins
 import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
-    _xtake, _curry_n, _xreduce_by
+    _xtake, _curry_n, _xreduce_by, _reduced
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "map", "reduce", "into", "tail", "take",
-           "reduce_by"]
+           "reduce_by", "reduced"]
 
 
 @_curry3
@@ -89,3 +89,6 @@ def reduce_by(value_fn, value_acc, key_fn, xs):
         acc[key] = value_fn(acc.get(key, copy.copy(value_acc)), elt)
         return acc
     return _reduce(_fn, {}, xs)
+
+
+reduced = _curry1(_reduced)

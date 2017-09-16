@@ -309,3 +309,24 @@ def describe_reduce_by():
             R.compose(sum_by_type, R.map(R.adjust(R.multiply(10), 1))),
             sum_input),
             {"A": 800, "B": 800, "C": 500})
+
+
+def describe_reduced():
+    @pytest.fixture
+    def stop_if_gte_10():
+        def _fn(acc, v):
+            result = acc + v
+            if result >= 10:
+                result = R.reduced(result)
+            return result
+        return _fn
+
+    def it_wraps_a_value():
+        v = {}
+        eq(R.reduced(v)._transducer_value, v)
+
+    def it_flags_value_as_reduced():
+        eq(R.reduced({})._transducer_reduced, True)
+
+    def it_short_circuits_reduce(stop_if_gte_10):
+        eq(R.reduce(stop_if_gte_10, 0, [1, 2, 3, 4, 5]), 10)
