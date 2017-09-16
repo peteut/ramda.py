@@ -51,7 +51,7 @@ def map(fn, functor):
             lambda *args: fn(functor(*args)))
     elif isinstance(functor, collections.Mapping):
         return functools.reduce(
-            lambda acc, key: collections.ChainMap(acc, {key: fn(functor[key])}),
+            lambda acc, key: acc.update({key: fn(functor[key])}) or acc,
             functor.keys(), {})
     else:
         return [fn(x) for x in functor]
