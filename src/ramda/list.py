@@ -10,8 +10,8 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
 from .function import curry_n
 
 
-__all__ = ["adjust", "filter", "all", "map", "reduce", "into", "tail", "take",
-           "reduce_by", "reduced"]
+__all__ = ["adjust", "filter", "all", "concat", "map", "reduce", "into", "tail", "take",
+           "reduce_by", "reduced", "reduce_right"]
 
 
 @_curry3
@@ -29,6 +29,21 @@ def adjust(fn, idx, xs):
 @_dispatchable(["all"], _xall)
 def all(fn, xs):
     return builtins.all(map(fn, xs))
+
+
+@_curry2
+def concat(a, b):
+    if isinstance(a, collections.Sequence):
+        if isinstance(b, collections.Sequence):
+            return a + b
+        raise TypeError("{} is not an array".format(b))
+    if isinstance(a, str):
+        if isinstance(b, str):
+            return a + b
+        raise TypeError("{} is ont a string".format(b))
+    if hasattr(a, "concat"):
+        return a.concat(b)
+    raise TypeError("{} does not have a method named \"concat\"".format(a))
 
 
 @_curry2
@@ -92,3 +107,8 @@ def reduce_by(value_fn, value_acc, key_fn, xs):
 
 
 reduced = _curry1(_reduced)
+
+
+@_curry3
+def reduce_right(fn, acc, xs):
+    return _reduce(lambda value, acc: fn(acc, value), acc, reversed(xs))

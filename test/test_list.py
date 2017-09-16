@@ -1,4 +1,5 @@
 import types
+import inspect
 import pytest
 import ramda as R
 from ramda.shared import eq
@@ -112,6 +113,49 @@ def describe_all():
     def it_is_curried(even):
         test = lambda n: even(n)
         eq(R.all(test)([2, 4, 6, 7, 8, 10]), False)
+
+
+def describe_concat():
+    @pytest.fixture
+    def z1():
+        ns = types.SimpleNamespace(x="z1")
+        ns.concat = lambda that: " ".join([ns.x, that.x])
+        return ns
+
+    @pytest.fixture
+    def z2():
+        return types.SimpleNamespace(x="z2")
+
+    def it_adds_combines_the_elements_of_the_two_lists():
+        eq(R.concat(["a", "b"], ["c", "d"]), ["a", "b", "c", "d"])
+        eq(R.concat([], ["c", "d"]), ["c", "d"])
+
+    def it_works_on_strings():
+        eq(R.concat("foo", "bar"), "foobar")
+        eq(R.concat("x", ""), "x")
+        eq(R.concat("", "x"), "x")
+        eq(R.concat("", ""), "")
+
+    def it_delegates_to_non_String_object_with_a_concat_method_as_second_param(z1, z2):
+        eq(R.concat(z1, z2), "z1 z2")
+
+    def it_is_curried():
+        conc123 = R.concat([1, 2, 3])
+        eq(conc123([4, 5, 6]), [1, 2, 3, 4, 5, 6])
+        eq(conc123(["a", "b", "c"]), [1, 2, 3, "a", "b", "c"])
+
+    def it_is_curried_like_a_binary_operator_that_accepts_an_initial_placeholder():
+        append_bar = R.concat(R.__, "bar")
+        eq(inspect.isfunction(append_bar), True)
+        eq(append_bar("foo"), "foobar")
+
+    def it_throws_if_attempting_to_combine_an_array_with_a_non_array():
+        with pytest.raises(TypeError):
+            R.concat([1], 2)
+
+    def it_throws_if_not_an_array_String_or_object_with_a_concat_method():
+        with pytest.raises(TypeError):
+            R.concat({}, {})
 
 
 def describe_map():
@@ -330,3 +374,31 @@ def describe_reduced():
 
     def it_short_circuits_reduce(stop_if_gte_10):
         eq(R.reduce(stop_if_gte_10, 0, [1, 2, 3, 4, 5]), 10)
+
+
+def describe_reduce_right():
+    @pytest.fixture
+    def avg():
+        return lambda a, b: (a + b) / 2
+
+    def it_folds_lists_in_the_right_order():
+        eq(R.reduce_right(lambda a, b: a + b, "", ["a", "b", "c", "d"]), "abcd")
+
+    def it_folds_subtract_over_arrays_in_the_right_order():
+        eq(R.reduce_right(lambda a, b: a - b, 0, [1, 2, 3, 4]), -2)
+
+    def it_folds_simple_functions_over_arrays_with_the_supplied_accumulator(avg):
+        eq(R.reduce_right(avg, 54, [12, 4, 10, 6]), 12)
+
+    def it_returns_the_accumulator_for_an_empty_array(avg):
+        eq(R.reduce_right(avg, 0, []), 0)
+
+    def it_is_curried(avg):
+        something = R.reduce_right(avg, 54)
+        rcat = R.reduce_right(R.concat, "")
+        eq(something([12, 4, 10, 6]), 12)
+        eq(rcat(["1", "2", "3", "4"]), "1234")
+
+    def it_correctly_reports_the_arity_of_curried_versions(avg):
+        something = R.reduce_right(avg, 0)
+        eq(get_arity(something), 1)
