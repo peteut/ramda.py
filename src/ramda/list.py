@@ -6,11 +6,11 @@ import builtins
 import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
-    _xtake, _curry_n, _xreduce_by, _reduced
+    _xtake, _curry_n, _xreduce_by, _reduced, _xany
 from .function import curry_n
 
 
-__all__ = ["adjust", "filter", "all", "concat", "map", "reduce", "into", "tail", "take",
+__all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
            "reduce_by", "reduced", "reduce_right"]
 
 
@@ -29,6 +29,12 @@ def adjust(fn, idx, xs):
 @_dispatchable(["all"], _xall)
 def all(fn, xs):
     return builtins.all(map(fn, xs))
+
+
+@_curry2
+@_dispatchable(["any"], _xany)
+def any(fn, xs):
+    return builtins.any(map(fn, xs))
 
 
 @_curry2

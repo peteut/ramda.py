@@ -6,6 +6,21 @@ from ramda.shared import eq
 from .common import list_xf, get_arity
 
 
+@pytest.fixture
+def T():
+    return lambda *_: True
+
+
+@pytest.fixture
+def is_odd():
+    return lambda b: b % 2 == 1
+
+
+@pytest.fixture
+def into_array():
+    return R.into([])
+
+
 def describe_adjust():
     @pytest.fixture
     def xs():
@@ -35,10 +50,6 @@ def describe_into():
         return R.add
 
     @pytest.fixture
-    def is_odd():
-        return lambda b: b % 2 == 1
-
-    @pytest.fixture
     def add_xf():
         return types.SimpleNamespace(
             _transducer_init=R.always(0),
@@ -60,10 +71,26 @@ def describe_into():
         eq(R.into({}, R.identity, [{"a": 1}, {"b": 2, "c": 3}]),
            {"a": 1, "b": 2, "c": 3})
 
-    def it_dispatches_to_objects_that_implement_reduce_function(add, is_odd):
+    def it_dispatches_to_objects_that_implement_reduce(add, is_odd):
         obj = {"x": [1, 2, 3], "reduce": lambda *_: "override"}
         eq(R.into([], R.map(add(1)), obj), "override")
         eq(R.into([], R.filter(is_odd), obj), "override")
+
+    def it_is_curried(add):
+        into_array = R.into([])
+        add2 = R.map(add(2))
+        result = into_array(add2)
+        eq(result([1, 2, 3, 4]), [3, 4, 5, 6])
+
+    def it_allows_custom_transformer(add_xf, add):
+        into_sum = R.into(add_xf)
+        add2 = R.map(add(2))
+        result = into_sum(add2)
+        eq(result([1, 2, 3, 4]), 18)
+
+    def it_correctly_reports_the_arity_of_curried_versions(add):
+        sum = R.into([], R.map(add))
+        eq(get_arity(sum), 1)
 
 
 def describe_all():
@@ -72,16 +99,8 @@ def describe_all():
         return lambda n: n % 2 == 0
 
     @pytest.fixture
-    def T():
-        return lambda *_: True
-
-    @pytest.fixture
     def is_false():
         return lambda x: x is False
-
-    @pytest.fixture
-    def into_array():
-        return R.into([])
 
     def it_returns_true_if_all_elements_satisfy_the_predicate(even, is_false):
         eq(R.all(even, [2, 4, 6, 8, 10, 12]), True)
@@ -113,6 +132,54 @@ def describe_all():
     def it_is_curried(even):
         test = lambda n: even(n)
         eq(R.all(test)([2, 4, 6, 7, 8, 10]), False)
+
+
+def describe_any():
+    def it_returns_true_if_any_element_satisfies_the_predicate(is_odd):
+        eq(R.any(is_odd, [2, 4, 6, 8, 10, 11, 12]), True)
+
+    def it_returns_false_if_all_elements_fails_to_satisfy_the_predicate(is_odd):
+        eq(R.any(is_odd, [2, 4, 6, 8, 10, 12]), False)
+
+    def it_returns_true_into_array_if_any_element_satisfies_the_predicate(
+            is_odd, into_array):
+        eq(into_array(R.any(is_odd), [2, 4, 6, 8, 10, 11, 12]), [True])
+
+    def it_returns_false_into_array_if_all_elements_fails_to_satisfy_the_predicate(
+            is_odd, into_array):
+        eq(into_array(R.any(is_odd), [2, 4, 6, 8, 10, 12]), [False])
+
+    def it_works_with_more_complex_objects():
+        people = [{"first": 'Paul', "last": 'Grenier'},
+                  {"first": 'Mike', "last": 'Hurley'},
+                  {"first": 'Will', "last": 'Klein'}]
+        alliterative = lambda person: person["first"][0] == person["last"][0]
+        eq(R.any(alliterative, people), False)
+        people.append({"first": 'Scott', "last": 'Sauyet'})
+        eq(R.any(alliterative, people), True)
+
+    def it_can_use_a_configurable_function():
+        teens = [{"name": 'Alice', "age": 14},
+                 {"name": 'Betty', "age": 18},
+                 {"name": 'Cindy', "age": 17}]
+        at_least = lambda age: lambda person: person["age"] >= age
+        eq(R.any(at_least(16), teens), True)
+        eq(R.any(at_least(21), teens), False)
+
+    def it_returns_false_for_an_empty_list():
+        eq(R.any(T, []), False)
+
+    def it_returns_false_into_array_for_an_empty_list(into_array):
+        eq(into_array(R.any(T), []), [False])
+
+    def it_dispatches_when_given_a_transformer_in_list_position(is_odd):
+        eq(R.any(is_odd, list_xf).any, False)
+        eq(R.any(is_odd, list_xf).f, is_odd)
+        eq(R.any(is_odd, list_xf).xf, list_xf)
+
+    def it_is_curried(is_odd):
+        test = lambda n: is_odd(n)
+        eq(R.any(test)([2, 4, 6, 7, 8, 10]), True)
 
 
 def describe_concat():
