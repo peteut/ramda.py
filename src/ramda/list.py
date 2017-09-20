@@ -6,12 +6,13 @@ import builtins
 import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
-    _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture
+    _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
+    _concat
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
-           "reduce_by", "reduced", "reduce_right", "aperture"]
+           "reduce_by", "reduced", "reduce_right", "aperture", "append"]
 
 
 @_curry3
@@ -117,3 +118,8 @@ def reduce_right(fn, acc, xs):
 
 
 aperture = _curry2(_dispatchable([], _xaperture)(_aperture))
+
+
+@_curry2
+def append(el, xs):
+    return _concat(xs, [el])

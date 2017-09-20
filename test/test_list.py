@@ -150,18 +150,18 @@ def describe_any():
         eq(into_array(R.any(is_odd), [2, 4, 6, 8, 10, 12]), [False])
 
     def it_works_with_more_complex_objects():
-        people = [{"first": 'Paul', "last": 'Grenier'},
-                  {"first": 'Mike', "last": 'Hurley'},
-                  {"first": 'Will', "last": 'Klein'}]
+        people = [{"first": "Paul", "last": "Grenier"},
+                  {"first": "Mike", "last": "Hurley"},
+                  {"first": "Will", "last": "Klein"}]
         alliterative = lambda person: person["first"][0] == person["last"][0]
         eq(R.any(alliterative, people), False)
-        people.append({"first": 'Scott', "last": 'Sauyet'})
+        people.append({"first": "Scott", "last": "Sauyet"})
         eq(R.any(alliterative, people), True)
 
     def it_can_use_a_configurable_function():
-        teens = [{"name": 'Alice', "age": 14},
-                 {"name": 'Betty', "age": 18},
-                 {"name": 'Cindy', "age": 17}]
+        teens = [{"name": "Alice", "age": 14},
+                 {"name": "Betty", "age": 18},
+                 {"name": "Cindy", "age": 17}]
         at_least = lambda age: lambda person: person["age"] >= age
         eq(R.any(at_least(16), teens), True)
         eq(R.any(at_least(21), teens), False)
@@ -492,3 +492,16 @@ def describe_aperture():
 
     def it_can_act_as_a_transducer(seven_ls):
         eq(R.into([], R.aperture(2), seven_ls), [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]])
+
+
+def describe_append():
+    def it_adds_the_element_to_the_end_of_the_list():
+        eq(R.append("z", ["x", "y"]), ["x", "y", "z"])
+        eq(R.append(["a", "z"], ["x", "y"]), ["x", "y", ["a", "z"]])
+
+    def it_works_on_empty_list():
+        eq(R.append(1, []), [1])
+
+    def it_is_curried():
+        eq(inspect.isfunction(R.append(4)), True)
+        eq(R.append(1)([4, 3, 2]), [4, 3, 2, 1])
