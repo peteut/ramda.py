@@ -411,3 +411,47 @@ def _xreduce_by(value_fn, value_acc, key_fn, xf):
             return result
 
     return _XReduceBy(value_fn, value_acc, key_fn, xf)
+
+
+@_curry2
+def _xaperture(n, xf):
+    class _XAperture(_XFBase):
+        def __init__(self, n, xf):
+            self.xf = xf
+            self.pos = 0
+            self.full = False
+            self.acc = [None for _ in range(n)]
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            self.acc = None
+            return self.xf._transducer_result(result)
+
+        def _transducer_step(self, result, input):
+            self.store(input)
+            return self.xf._transducer_step(result, self.get_copy()) \
+                if self.full else result
+
+        def store(self, input):
+            self.acc[self.pos] = input
+            self.pos += 1
+            if self.pos == len(self.acc):
+                self.pos = 0
+                self.full = True
+
+        def get_copy(self):
+            return _concat(self.acc[self.pos:], self.acc[:self.pos])
+
+    return _XAperture(n, xf)
+
+
+def _aperture(n, xs):
+    idx = 0
+    limit = len(xs) - (n - 1)
+    acc = []
+    while idx < limit:
+        acc.append(xs[idx: idx + n])
+        idx += 1
+    return acc

@@ -469,3 +469,26 @@ def describe_reduce_right():
     def it_correctly_reports_the_arity_of_curried_versions(avg):
         something = R.reduce_right(avg, 0)
         eq(get_arity(something), 1)
+
+
+def describe_aperture():
+    @pytest.fixture
+    def seven_ls():
+        return [1, 2, 3, 4, 5, 6, 7]
+
+    def it_creates_a_list_of_n_tuples_from_a_list(seven_ls):
+        eq(R.aperture(1, seven_ls), [[1], [2], [3], [4], [5], [6], [7]])
+        eq(R.aperture(2, seven_ls), [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]])
+        eq(R.aperture(3, seven_ls), [[1, 2, 3], [2, 3, 4], [3, 4, 5], [4, 5, 6], [5, 6, 7]])
+        eq(R.aperture(4, [1, 2, 3, 4]), [[1, 2, 3, 4]])
+
+    def it_returns_an_empty_list_when_n_gt_list_length(seven_ls):
+        eq(R.aperture(6, [1, 2, 3]), [])
+        eq(R.aperture(1, []), [])
+
+    def it_is_curried(seven_ls):
+        pairwise = R.aperture(2)
+        eq(pairwise(seven_ls), [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]])
+
+    def it_can_act_as_a_transducer(seven_ls):
+        eq(R.into([], R.aperture(2), seven_ls), [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7]])
