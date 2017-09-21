@@ -3,7 +3,7 @@ import inspect
 import pytest
 import ramda as R
 from ramda.shared import eq
-from .common import list_xf, get_arity
+from .common import list_xf, get_arity, _is_transformer
 
 
 @pytest.fixture
@@ -505,3 +505,116 @@ def describe_append():
     def it_is_curried():
         eq(inspect.isfunction(R.append(4)), True)
         eq(R.append(1)([4, 3, 2]), [4, 3, 2, 1])
+
+
+def describe_chain():
+    @pytest.fixture
+    def add1():
+        return lambda x: [x + 1]
+
+    @pytest.fixture
+    def dec():
+        return lambda x: [x - 1]
+
+    @pytest.fixture
+    def times2():
+        return lambda x: [x * 2]
+
+    def it_maps_a_function_over_a_nested_list_and_returns_the_shallow_flattened_result(
+            times2):
+        eq(R.chain(times2, [1, 2, 3, 1, 0, 10, -3, 5, 7]), [2, 4, 6, 2, 0, 20, -6, 10, 14])
+        eq(R.chain(times2, [1, 2, 3]), [2, 4, 6])
+
+    def it_does_not_flatten_recursively():
+        f = lambda xs: [xs[0]] if len(xs) else []
+        eq(R.chain(f, [[1], [[2], 100], [], [3, [4]]]), [1, [2], 3])
+
+    def it_maps_a_function_into_a_shallow_flat_result(into_array, times2):
+        eq(into_array(R.chain(times2), [1, 2, 3, 4]), [2, 4, 6, 8])
+
+    def it_interprets_function_as_a_monad():
+        h = lambda r: r * 2
+        f = lambda a: lambda r: r + a
+        bound = R.chain(f, h)
+        # // (>>=) :: (r -> a) -> (a -> r -> b) -> (r -> b)
+        # // h >>= f = \w -> f (h w) w
+        eq(bound(10), (10 * 2) + 10)
+        eq(R.chain(R.append, R.head)([1, 2, 3]), [1, 2, 3, 1])
+
+    def it_dispatches_to_objects_that_implement_chain(add1):
+        obj = {"x": 100}
+        obj["chain"] = lambda f: f(obj["x"])
+        eq(R.chain(add1, obj), [101])
+
+    def it_dispatches_to_transformer_objects(add1):
+        eq(_is_transformer(R.chain(add1, list_xf)), True)
+
+    def it_composes(times2, dec):
+        mdouble = R.chain(times2)
+        mdec = R.chain(dec)
+        eq(mdec(mdouble([10, 20, 30])), [19, 39, 59])
+
+    def it_can_compose_transducer_style(times2, dec, into_array):
+        mdouble = R.chain(times2)
+        mdec = R.chain(dec)
+        xcomp = R.compose(mdec, mdouble)
+        eq(into_array(xcomp, [10, 20, 30]), [18, 38, 58])
+
+    def it_is_curried(add1):
+        flat_inc = R.chain(add1)
+        eq(flat_inc([1, 2, 3, 4, 5, 6]), [2, 3, 4, 5, 6, 7])
+
+    def it_correctly_reports_the_arity_of_curried_versions(add1):
+        inc = R.chain(add1)
+        eq(get_arity(inc), 1)
+
+
+def describe_nth():
+    @pytest.fixture
+    def xs():
+        return ['foo', 'bar', 'baz', 'quux']
+
+    def it_accepts_positive_offsets(xs):
+        eq(R.nth(0, xs), 'foo')
+        eq(R.nth(1, xs), 'bar')
+        eq(R.nth(2, xs), 'baz')
+        eq(R.nth(3, xs), 'quux')
+        eq(R.nth(4, xs), None)
+
+        eq(R.nth(0, 'abc'), 'a')
+        eq(R.nth(1, 'abc'), 'b')
+        eq(R.nth(2, 'abc'), 'c')
+        eq(R.nth(3, 'abc'), '')
+
+    def it_accepts_negative_offsets(xs):
+        eq(R.nth(-1, xs), 'quux')
+        eq(R.nth(-2, xs), 'baz')
+        eq(R.nth(-3, xs), 'bar')
+        eq(R.nth(-4, xs), 'foo')
+        eq(R.nth(-5, xs), None)
+
+        eq(R.nth(-1, 'abc'), 'c')
+        eq(R.nth(-2, 'abc'), 'b')
+        eq(R.nth(-3, 'abc'), 'a')
+        eq(R.nth(-4, 'abc'), '')
+
+    def it_throws_if_applied_to_none():
+        with pytest.raises(TypeError):
+            R.nth(0, None)
+
+
+def describe_head():
+    def it_returns_the_first_element_of_an_ordered_collection():
+        eq(R.head([1, 2, 3]), 1)
+        eq(R.head([2, 3]), 2)
+        eq(R.head([3]), 3)
+        eq(R.head([]), None)
+
+        eq(R.head('abc'), 'a')
+        eq(R.head('bc'), 'b')
+        eq(R.head('c'), 'c')
+        eq(R.head(''), '')
+
+    def it_throws_if_applied_to_none():
+        with pytest.raises(TypeError):
+            R.head(None)

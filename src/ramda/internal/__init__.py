@@ -188,6 +188,10 @@ def _reduced(x):
         types.SimpleNamespace(_transducer_value=x, _transducer_reduced=True)
 
 
+def _force_reduced(x):
+    return types.SimpleNamespace(_transducer_value=x, _transducer_reduced=True)
+
+
 class _XFBase():
     def init(self):
         return self.xf._transducer_init()
@@ -452,3 +456,58 @@ def _aperture(n, xs):
         acc.append(xs[idx: idx + n])
         idx += 1
     return acc
+
+
+def _make_flat(recursive):
+    def flatt(xs):
+        result = []
+        for item in xs:
+            if isinstance(item, collections.Sequence):
+                value = flatt(item) if recursive else item
+                result += value
+            else:
+                result.append(item)
+        return result
+    return flatt
+
+
+def _xcat(xf):
+    class _PreservingReduced(_XFBase):
+        def __init__(self, xf):
+            self.xf = xf
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            return self.xf._transducer_result(result)
+
+        def _transducer_step(self, result, input):
+            ret = self.xf._transducer_step(result, input)
+            print(ret)
+            return _force_reduced(ret) if getattr(ret, "_transducer_reduced", False) \
+                else ret
+
+    class _XCat(_XFBase):
+        def __init__(self, xf):
+            self.rxf = _PreservingReduced(xf)
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            return self.rxf._transducer_result(result)
+
+        def _transducer_step(self, result, input):
+            return _reduce(self.rxf, result, [input]) \
+                if not isinstance(input, collections.Sequence) \
+                else _reduce(self.rxf, result, input)
+
+    return _XCat(xf)
+
+
+@_curry2
+def _xchain(f, xf):
+    from ..list import map
+
+    return map(f, _xcat(xf))

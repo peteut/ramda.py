@@ -7,12 +7,13 @@ import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
-    _concat
+    _concat, _make_flat, _xchain
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
-           "reduce_by", "reduced", "reduce_right", "aperture", "append"]
+           "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain",
+           "nth", "head"]
 
 
 @_curry3
@@ -123,3 +124,22 @@ aperture = _curry2(_dispatchable([], _xaperture)(_aperture))
 @_curry2
 def append(el, xs):
     return _concat(xs, [el])
+
+
+@_curry2
+@_dispatchable(["chain"], _xchain)
+def chain(fn, monad):
+    if isinstance(monad, collections.Callable):
+        return lambda x: fn(monad(x))(x)
+    return _make_flat(False)(map(fn, monad))
+
+
+@_curry2
+def nth(offset, xs):
+    try:
+        return xs[offset]
+    except IndexError:
+        return "" if isinstance(xs, str) else None
+
+
+head = nth(0)
