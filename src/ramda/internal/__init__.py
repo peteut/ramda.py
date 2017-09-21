@@ -418,9 +418,8 @@ def _xaperture(n, xf):
     class _XAperture(_XFBase):
         def __init__(self, n, xf):
             self.xf = xf
-            self.pos = 0
             self.full = False
-            self.acc = [None for _ in range(n)]
+            self.acc = collections.deque([], n)
 
         def _transducer_init(self):
             return super().init()
@@ -435,14 +434,12 @@ def _xaperture(n, xf):
                 if self.full else result
 
         def store(self, input):
-            self.acc[self.pos] = input
-            self.pos += 1
-            if self.pos == len(self.acc):
-                self.pos = 0
+            self.acc.append(input)
+            if len(self.acc) == self.acc.maxlen:
                 self.full = True
 
         def get_copy(self):
-            return _concat(self.acc[self.pos:], self.acc[:self.pos])
+            return list(self.acc)
 
     return _XAperture(n, xf)
 
