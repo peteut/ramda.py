@@ -569,34 +569,70 @@ def describe_chain():
         eq(get_arity(inc), 1)
 
 
+def describe_contains():
+    def it_returns_true_if_an_element_is_in_a_list():
+        eq(R.contains(7, [1, 2, 3, 9, 8, 7, 100, 200, 300]), True)
+
+    def it_returns_false_if_an_element_is_not_in_a_list():
+        eq(R.contains(99, [1, 2, 3, 9, 8, 7, 100, 200, 300]), False)
+
+    def it_returns_false_for_the_empty_list():
+        eq(R.contains(1, []), False)
+
+    def it_has_r_equals_semantics():
+        class Just:
+            def __init__(self, x):
+                self.value = x
+
+            def equals(self, x):
+                print("equals, x.value={}, self.value={}".format(
+                    x.value, self.value))
+                return isinstance(x, Just) and R.equals(x.value, self.value)
+
+        eq(R.contains(float("nan"), [float("nan")]), True)
+        eq(R.contains(Just([42]), [Just([42])]), True)
+
+    def it_is_curried():
+        eq(inspect.isfunction(R.contains(7)), True)
+        eq(R.contains(7)([1, 2, 3]), False)
+        eq(R.contains(7)([1, 2, 7, 3]), True)
+
+    def it_is_curried_like_a_binary_operator_that_accepts_an_initial_placeholdern():
+        is_digit = R.contains(R.__, ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"])
+        eq(inspect.isfunction(is_digit), True)
+        eq(is_digit("0"), True)
+        eq(is_digit("1"), True)
+        eq(is_digit("x"), False)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
-        return ['foo', 'bar', 'baz', 'quux']
+        return ["foo", "bar", "baz", "quux"]
 
     def it_accepts_positive_offsets(xs):
-        eq(R.nth(0, xs), 'foo')
-        eq(R.nth(1, xs), 'bar')
-        eq(R.nth(2, xs), 'baz')
-        eq(R.nth(3, xs), 'quux')
+        eq(R.nth(0, xs), "foo")
+        eq(R.nth(1, xs), "bar")
+        eq(R.nth(2, xs), "baz")
+        eq(R.nth(3, xs), "quux")
         eq(R.nth(4, xs), None)
 
-        eq(R.nth(0, 'abc'), 'a')
-        eq(R.nth(1, 'abc'), 'b')
-        eq(R.nth(2, 'abc'), 'c')
-        eq(R.nth(3, 'abc'), '')
+        eq(R.nth(0, "abc"), "a")
+        eq(R.nth(1, "abc"), "b")
+        eq(R.nth(2, "abc"), "c")
+        eq(R.nth(3, "abc"), "")
 
     def it_accepts_negative_offsets(xs):
-        eq(R.nth(-1, xs), 'quux')
-        eq(R.nth(-2, xs), 'baz')
-        eq(R.nth(-3, xs), 'bar')
-        eq(R.nth(-4, xs), 'foo')
+        eq(R.nth(-1, xs), "quux")
+        eq(R.nth(-2, xs), "baz")
+        eq(R.nth(-3, xs), "bar")
+        eq(R.nth(-4, xs), "foo")
         eq(R.nth(-5, xs), None)
 
-        eq(R.nth(-1, 'abc'), 'c')
-        eq(R.nth(-2, 'abc'), 'b')
-        eq(R.nth(-3, 'abc'), 'a')
-        eq(R.nth(-4, 'abc'), '')
+        eq(R.nth(-1, "abc"), "c")
+        eq(R.nth(-2, "abc"), "b")
+        eq(R.nth(-3, "abc"), "a")
+        eq(R.nth(-4, "abc"), "")
 
     def it_throws_if_applied_to_none():
         with pytest.raises(TypeError):
@@ -610,10 +646,10 @@ def describe_head():
         eq(R.head([3]), 3)
         eq(R.head([]), None)
 
-        eq(R.head('abc'), 'a')
-        eq(R.head('bc'), 'b')
-        eq(R.head('c'), 'c')
-        eq(R.head(''), '')
+        eq(R.head("abc"), "a")
+        eq(R.head("bc"), "b")
+        eq(R.head("c"), "c")
+        eq(R.head(""), "")
 
     def it_throws_if_applied_to_none():
         with pytest.raises(TypeError):

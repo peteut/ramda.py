@@ -1,8 +1,7 @@
-import math
-from .internal import _curry2, _curry3
+from .internal import _curry2, _curry3, _equals, _identical
 
 
-__all__ = ["clamp", "identical"]
+__all__ = ["clamp", "equals", "identical"]
 
 
 @_curry3
@@ -15,10 +14,6 @@ def clamp(min, max, value):
         value
 
 
-@_curry2
-def identical(a, b):
-    if isinstance(a, float) and math.isnan(a):
-        return math.isnan(b)
-    if isinstance(a, str) and isinstance(b, str):
-        return a == b
-    return id(a) == id(b)
+equals = _curry2(_equals)
+
+identical = _curry2(_identical)

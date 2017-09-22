@@ -7,12 +7,12 @@ import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
-    _concat, _make_flat, _xchain
+    _concat, _make_flat, _xchain, _contains
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
-           "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain",
+           "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
            "nth", "head"]
 
 
@@ -132,6 +132,9 @@ def chain(fn, monad):
     if isinstance(monad, collections.Callable):
         return lambda x: fn(monad(x))(x)
     return _make_flat(False)(map(fn, monad))
+
+
+contains = _curry2(_contains)
 
 
 @_curry2

@@ -1,6 +1,8 @@
 import collections
 import types
 import functools
+import builtins
+import math
 
 
 class _Placeholder():
@@ -12,6 +14,61 @@ __ = _Placeholder()
 
 def _assign(target, *args):
     return functools.reduce(lambda acc, obj: acc.update(obj) or acc, args, target)
+
+
+def _keys(obj):
+    return obj.keys() if isinstance(obj, collections.Mapping) else \
+        [idx for idx in range(len(obj))] if isinstance(obj, collections.Sequence) else \
+        []
+
+
+def _identical(a, b):
+    if isinstance(a, float) and math.isnan(a):
+        return isinstance(b, float) and math.isnan(b)
+    if isinstance(a, str) and isinstance(b, str):
+        return a == b
+    return id(a) == id(b)
+
+
+def _has(prop, obj):
+    try:
+        return prop in obj if isinstance(obj, collections.Mapping) else \
+            obj[prop] and True
+    except IndexError:
+        return False
+
+
+def _equals(a, b, stack_a=[], stack_b=[]):
+    if _identical(a, b):
+        return True
+    if type(a) != type(b):
+        return False
+    if a is None or b is None:
+        return False
+    if isinstance(getattr(a, "equals", None), collections.Callable) or \
+            isinstance(getattr(b, "equals", None), collections.Callable):
+        return isinstance(getattr(a, "equals", None), collections.Callable) and \
+            a.equals(b) and \
+            isinstance(getattr(b, "equals", None), collections.Callable) and \
+            b.equals(a)
+    if isinstance(a, (int, float, str)):
+        if not (type(a) == type(b) and _identical(a, b)):
+            return False
+
+    keys_a = _keys(a)
+    if len(keys_a) != len(_keys(b)):
+        return False
+    for item_a, item_b in builtins.reversed(builtins.list(builtins.zip(stack_a, stack_b))):
+        if id(item_a) == id(a):
+            return id(item_b) == id(b)
+    stack_a.append(a)
+    stack_b.append(b)
+    for key in keys_a:
+        if not (_has(key, b) and _equals(b[key], a[key], stack_a, stack_b)):
+            return False
+    stack_a.pop()
+    stack_b.pop()
+    return True
 
 
 def _is_placeholder(x):
@@ -484,7 +541,6 @@ def _xcat(xf):
 
         def _transducer_step(self, result, input):
             ret = self.xf._transducer_step(result, input)
-            print(ret)
             return _force_reduced(ret) if getattr(ret, "_transducer_reduced", False) \
                 else ret
 
@@ -511,3 +567,14 @@ def _xchain(f, xf):
     from ..list import map
 
     return map(f, _xcat(xf))
+
+
+def _index_of(xs, a, idx):
+    for idx, item in enumerate(xs):
+        if _equals(item, a):
+            return idx
+    return -1
+
+
+def _contains(a, xs):
+    return _index_of(xs, a, 0) >= 0
