@@ -21,6 +21,11 @@ def into_array():
     return R.into([])
 
 
+@pytest.fixture
+def not_equal():
+    return lambda a, b: id(a) is not id(b)
+
+
 def describe_adjust():
     @pytest.fixture
     def xs():
@@ -325,9 +330,8 @@ def describe_take():
         eq(R.take(-1, [1, 2, 3]), [1, 2, 3])
         eq(R.take(float("-inf"), [1, 2, 3]), [1, 2, 3])
 
-    def it_never_returns_the_input_array():
+    def it_never_returns_the_input_array(not_equal):
         xs = [1, 2, 3]
-        not_equal = lambda a, b: id(a) is not id(b)
 
         eq(not_equal(R.take(3, xs), xs), True)
         eq(not_equal(R.take(float("inf"), xs), xs), True)
@@ -603,6 +607,31 @@ def describe_contains():
         eq(is_digit("0"), True)
         eq(is_digit("1"), True)
         eq(is_digit("x"), False)
+
+
+def describe_drop():
+    def it_skips_the_first_n_elements_from_a_list_returning_the_remainder():
+        eq(R.drop(3, ["a", "b", "c", "d", "e", "f", "g"]), ["d", "e", "f", "g"])
+
+    def it_returns_an_empty_array_if_n_is_too_large():
+        eq(R.drop(20, ["a", "b", "c", "d", "e", "f", "g"]), [])
+
+    def it_returns_an_equivalent_list_if_n_is_lte_0():
+        eq(R.drop(0, [1, 2, 3]), [1, 2, 3])
+        eq(R.drop(-1, [1, 2, 3]), [1, 2, 3])
+        eq(R.drop(float("-inf"), [1, 2, 3]), [1, 2, 3])
+
+    def it_never_returns_the_input_array(not_equal):
+        xs = [1, 2, 3]
+
+        eq(not_equal(id(R.drop(0, xs)), id(xs)), True)
+        eq(not_equal(id(R.drop(-1, xs)), id(xs)), True)
+
+    def it_can_operate_on_strings():
+        eq(R.drop(3, "Ramda"), "da")
+        eq(R.drop(4, "Ramda"), "a")
+        eq(R.drop(5, "Ramda"), "")
+        eq(R.drop(6, "Ramda"), "")
 
 
 def describe_nth():
