@@ -2,18 +2,19 @@ import inspect
 import collections
 import copy
 import functools
+import itertools
 import builtins
 import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
-    _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last
+    _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
-           "drop", "drop_last",
+           "drop", "drop_last", "drop_last_while",
            "nth", "head"]
 
 
@@ -148,6 +149,14 @@ def drop(n, xs):
 @_dispatchable([], _xdrop_last)
 def drop_last(n, xs):
     return take(len(xs) - n if n < len(xs) else 0, xs)
+
+
+@_curry2
+@_dispatchable([], _xdrop_last_while)
+def drop_last_while(fn, xs):
+    drop = len([None for _ in itertools.takewhile(fn, builtins.reversed(xs))])
+    to = len(xs) - drop
+    return xs[:to]
 
 
 @_curry2

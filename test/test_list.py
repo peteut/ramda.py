@@ -638,6 +638,11 @@ def describe_drop():
         eq(drop3(list_xf).n, 3)
         eq(drop3(list_xf).xf, list_xf)
 
+    def it_can_act_as_a_transducer(into_array):
+        drop3 = R.drop(3)
+        eq(into_array(drop3, [1, 2, 3, 4]), [4])
+        eq(into_array(drop3, [1, 2, 3]), [])
+
 
 def describe_drop_last():
     def it_skips_the_last_n_elements_from_a_list_returning_the_remainder():
@@ -670,6 +675,37 @@ def describe_drop_last():
         eq(drop_last2(list_xf).n, 2)
         eq(drop_last2(list_xf).full, False)
         eq(drop_last2(list_xf).xf, list_xf)
+
+    def it_can_act_as_a_transducer(into_array):
+        drop_last2 = R.drop_last(2)
+        eq(into_array(drop_last2, [1, 2, 3, 4]), [1, 2])
+        eq(into_array(drop_last2, []), [])
+
+
+def describe_drop_last_while():
+    def it_skips_elements_while_the_function_reports_true():
+        eq(R.drop_last_while(lambda x: x >= 5, [1, 3, 5, 7, 9]), [1, 3])
+
+    def it_returns_an_empty_list_for_an_empty_list():
+        eq(R.drop_last_while(lambda _: False, []), [])
+        eq(R.drop_last_while(lambda _: False, []), [])
+
+    def it_starts_at_the_right_arg_and_acknowledges_none():
+        sublist = R.drop_last_while(lambda x: x is not None, [1, 3, None, 5, 7])
+        eq(len(sublist), 3)
+        eq(sublist[0], 1)
+        eq(sublist[1], 3)
+        eq(sublist[2], None)
+
+    def it_is_curried():
+        drop_gt_7 = R.drop_last_while(lambda x: x > 7)
+        eq(drop_gt_7([1, 3, 5, 7, 9]), [1, 3, 5, 7])
+        eq(drop_gt_7([1, 3, 5]), [1, 3, 5])
+
+    def it_can_act_as_a_transducer(into_array):
+        drop_lt_7 = R.drop_last_while(lambda x: x < 7)
+        eq(into_array(drop_lt_7, [1, 3, 5, 7, 9, 1, 2]), [1, 3, 5, 7, 9])
+        eq(into_array(drop_lt_7, [1, 3, 5]), [])
 
 
 def describe_nth():
