@@ -580,6 +580,7 @@ def _contains(a, xs):
     return _index_of(xs, a, 0) >= 0
 
 
+@_curry2
 def _xdrop(n, xf):
     class _XDrop(_XFBase):
         def __init__(self, n, xf):
@@ -599,3 +600,32 @@ def _xdrop(n, xf):
             return self.xf._transducer_step(result, input)
 
     return _XDrop(n, xf)
+
+
+@_curry2
+def _xdrop_last(n, xf):
+    class _XDropLast(_XFBase):
+        def __init__(self, n, xf):
+            self.xf = xf
+            self.n = n
+            self.full = False
+            self.acc = collections.deque([], n)
+
+        def _transducer_init(self):
+            return super().init()
+
+        def _transducer_result(self, result):
+            return super().result(result)
+
+        def _transducer_step(self, result, input):
+            if self.full:
+                result = self.xf._transducer_step(result, self.acc[-1])
+            self.store(input)
+            return result
+
+        def store(self, input):
+            self.acc.append(input)
+            if len(self.acc) == self.acc.maxlen:
+                self.full = True
+
+    return _XDropLast(n, xf)

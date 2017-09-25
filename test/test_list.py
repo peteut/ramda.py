@@ -633,6 +633,44 @@ def describe_drop():
         eq(R.drop(5, "Ramda"), "")
         eq(R.drop(6, "Ramda"), "")
 
+    def it_dispatches_when_given_a_transformer_in_list_position():
+        drop3 = R.drop(3)
+        eq(drop3(list_xf).n, 3)
+        eq(drop3(list_xf).xf, list_xf)
+
+
+def describe_drop_last():
+    def it_skips_the_last_n_elements_from_a_list_returning_the_remainder():
+        eq(R.drop_last(3, ["a", "b", "c", "d", "e", "f", "g"]), ["a", "b", "c", "d"])
+
+    def it_returns_an_empty_array_if_n_is_too_large():
+        eq(R.drop_last(20, ["a", "b", "c", "d", "e", "f", "g"]), [])
+
+    def it_returns_an_equivalent_list_if_n_is_lte_0():
+        eq(R.drop_last(0, [1, 2, 3]), [1, 2, 3])
+        eq(R.drop_last(-1, [1, 2, 3]), [1, 2, 3])
+        eq(R.drop_last(float("-inf"), [1, 2, 3]), [1, 2, 3])
+
+    def it_never_returns_the_input_array(not_equal):
+        xs = [1, 2, 3]
+
+        eq(not_equal(R.drop_last(0, xs), xs), True)
+        eq(not_equal(R.drop_last(-1, xs), xs), True)
+
+    def it_can_operate_on_strings():
+        eq(R.drop_last(3, "Ramda"), "Ra")
+
+    def it_is_curried():
+        drop_last2 = R.drop_last(2)
+        eq(drop_last2(["a", "b", "c", "d", "e"]), ["a", "b", "c"])
+        eq(drop_last2(["x", "y", "z"]), ["x"])
+
+    def it_dispatches_when_given_a_transformer_in_list_position():
+        drop_last2 = R.drop_last(2)
+        eq(drop_last2(list_xf).n, 2)
+        eq(drop_last2(list_xf).full, False)
+        eq(drop_last2(list_xf).xf, list_xf)
+
 
 def describe_nth():
     @pytest.fixture
