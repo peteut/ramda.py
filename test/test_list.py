@@ -708,6 +708,45 @@ def describe_drop_last_while():
         eq(into_array(drop_lt_7, [1, 3, 5]), [])
 
 
+def describe_drop_repeats_with():
+    @pytest.fixture
+    def objs():
+        return [{"i": 1}, {"i": 2}, {"i": 3}, {"i": 4}, {"i": 5}, {"i": 3}]
+
+    @pytest.fixture
+    def objs2():
+        return[
+            {"i": 1}, {"i": 1}, {"i": 1}, {"i": 2}, {"i": 3},
+            {"i": 3}, {"i": 4}, {"i": 4}, {"i": 5}, {"i": 3}]
+
+    @pytest.fixture
+    def eq_i():
+        return lambda x, y: x["i"] == y["i"]  # FIXME: R.eqProps('i')
+
+    def it_removes_repeated_elements_based_on_predicate(objs, objs2, eq_i):
+        eq(R.drop_repeats_with(eq_i, objs2), objs)
+        eq(R.drop_repeats_with(eq_i, objs), objs)
+
+    def it_keeps_elements_from_the_left(eq_i):
+        eq(
+            R.drop_repeats_with(
+                eq_i,
+                [{"i": 1, "n": 1}, {"i": 1, "n": 2}, {"i": 1, "n": 3},
+                 {"i": 4, "n": 1}, {"i": 4, "n": 2}]),
+            [{"i": 1, "n": 1}, {"i": 4, "n": 1}])
+
+    def it_returns_an_empty_array_for_an_empty_array(eq_i):
+        eq(R.drop_repeats_with(eq_i, []), [])
+
+    def it_is_curried(objs, objs2, eq_i):
+        eq(inspect.isfunction(R.drop_repeats_with(eq_i)), True)
+        eq(R.drop_repeats_with(eq_i)(objs), objs)
+        eq(R.drop_repeats_with(eq_i)(objs2), objs)
+
+    def it_can_act_as_a_transducer(eq_i, objs, objs2):
+        eq(R.into([], R.drop_repeats_with(eq_i), objs2), objs)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

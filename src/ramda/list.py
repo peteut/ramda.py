@@ -8,13 +8,14 @@ import fastnumbers
 from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
-    _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while
+    _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
+    _xdrop_repeats_with
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
-           "drop", "drop_last", "drop_last_while",
+           "drop", "drop_last", "drop_last_while", "drop_repeats_with",
            "nth", "head"]
 
 
@@ -157,6 +158,14 @@ def drop_last_while(fn, xs):
     drop = len([None for _ in itertools.takewhile(fn, builtins.reversed(xs))])
     to = len(xs) - drop
     return xs[:to]
+
+
+@_curry2
+@_dispatchable([], _xdrop_repeats_with)
+def drop_repeats_with(pred, xs):
+    return functools.reduce(
+        lambda acc, x: acc.append(x) or acc if not pred(x, acc[-1]) else acc,
+        xs, [xs[0]]) if len(xs) else []
 
 
 @_curry2
