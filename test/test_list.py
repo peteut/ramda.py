@@ -26,6 +26,18 @@ def not_equal():
     return lambda a, b: id(a) is not id(b)
 
 
+@pytest.fixture
+def just():
+    class Just:
+        def __init__(self, x):
+            self.value = x
+
+        def equals(self, x):
+            return isinstance(x, Just) and R.equals(x.value, self.value)
+
+    return Just
+
+
 def describe_adjust():
     @pytest.fixture
     def xs():
@@ -583,18 +595,9 @@ def describe_contains():
     def it_returns_false_for_the_empty_list():
         eq(R.contains(1, []), False)
 
-    def it_has_r_equals_semantics():
-        class Just:
-            def __init__(self, x):
-                self.value = x
-
-            def equals(self, x):
-                print("equals, x.value={}, self.value={}".format(
-                    x.value, self.value))
-                return isinstance(x, Just) and R.equals(x.value, self.value)
-
+    def it_has_r_equals_semantics(just):
         eq(R.contains(float("nan"), [float("nan")]), True)
-        eq(R.contains(Just([42]), [Just([42])]), True)
+        eq(R.contains(just([42]), [just([42])]), True)
 
     def it_is_curried():
         eq(inspect.isfunction(R.contains(7)), True)
@@ -745,6 +748,32 @@ def describe_drop_repeats_with():
 
     def it_can_act_as_a_transducer(eq_i, objs, objs2):
         eq(R.into([], R.drop_repeats_with(eq_i), objs2), objs)
+
+
+def describe_drop_repeats():
+    @pytest.fixture
+    def objs():
+        return [1, 2, 3, 4, 5, 3, 2]
+
+    @pytest.fixture
+    def objs2():
+        return [1, 2, 2, 2, 3, 4, 4, 5, 5, 3, 2, 2]
+
+    def it_removes_repeated_elements(objs, objs2):
+        eq(R.drop_repeats(objs2), objs)
+        eq(R.drop_repeats(objs), objs)
+
+    def it_returns_an_empty_array_for_an_empty_array():
+        eq(R.drop_repeats([]), [])
+
+    def it_can_act_as_a_transducer(objs2, objs):
+        eq(R.into([], R.drop_repeats, objs2), objs)
+
+    def it_has_equals_semantics(just):
+        # eq(get_arity(R.drop_repeats([0, -0])), 2)
+        # eq(get_arity(R.drop_repeats([-0, 0])), 2)
+        eq(len(R.drop_repeats([float("nan"), float("nan")])), 1)
+        eq(len(R.drop_repeats([just([42]), just([42])])), 1)
 
 
 def describe_nth():

@@ -9,13 +9,13 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
-    _xdrop_repeats_with
+    _xdrop_repeats_with, _equals
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
-           "drop", "drop_last", "drop_last_while", "drop_repeats_with",
+           "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "nth", "head"]
 
 
@@ -166,6 +166,10 @@ def drop_repeats_with(pred, xs):
     return functools.reduce(
         lambda acc, x: acc.append(x) or acc if not pred(x, acc[-1]) else acc,
         xs, [xs[0]]) if len(xs) else []
+
+
+drop_repeats = _curry1(_dispatchable(
+    [], _xdrop_repeats_with(_equals), drop_repeats_with(_equals)))
 
 
 @_curry2
