@@ -799,6 +799,32 @@ def describe_drop_while():
         eq(into_array(R.drop_while(lambda x: x < 7), [1, 3, 5, 7, 9]), [7, 9])
 
 
+def describe_ends_with():
+    def it_should_return_true_when_a_string_ends_with_the_provided_value():
+        eq(R.ends_with('c', 'abc'), True)
+
+    def it_should_return_true_when_a_long_string_ends_with_the_provided_value():
+        eq(R.ends_with('ology', 'astrology'), True)
+
+    def it_should_return_false_when_a_string_does_not_end_with_the_provided_value():
+        eq(R.ends_with('b', 'abc'), False)
+
+    def it_should_return_false_when_a_long_string_does_not_end_with_the_provided_value():
+        eq(R.ends_with('olog', 'astrology'), False)
+
+    def it_should_return_true_when_an_array_ends_with_the_provided_value():
+        eq(R.ends_with(['c'], ['a', 'b', 'c']), True)
+
+    def it_should_return_true_when_an_array_ends_with_the_provided_values():
+        eq(R.ends_with(['b', 'c'], ['a', 'b', 'c']), True)
+
+    def it_should_return_false_when_an_array_does_not_end_with_the_provided_value():
+        eq(R.ends_with(['b'], ['a', 'b', 'c']), False)
+
+    def it_should_return_false_when_an_array_does_not_end_with_the_provided_values():
+        eq(R.ends_with(['a', 'b'], ['a', 'b', 'c']), False)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

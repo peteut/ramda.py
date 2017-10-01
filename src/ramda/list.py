@@ -16,7 +16,7 @@ from .function import curry_n
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
-           "drop_while",
+           "drop_while", "ends_with",
            "nth", "head"]
 
 
@@ -177,6 +177,11 @@ drop_repeats = _curry1(_dispatchable(
 @_dispatchable(["drop_while"], _xdrop_while)
 def drop_while(pred, xs):
     return list(itertools.dropwhile(pred, xs))
+
+
+@_curry2
+def ends_with(suffix, xs):
+    return _equals(xs[-len(suffix):], suffix)
 
 
 @_curry2
