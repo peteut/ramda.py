@@ -93,8 +93,7 @@ def describe_into():
         eq(R.into([], R.map(add(1)), obj), "override")
         eq(R.into([], R.filter(is_odd), obj), "override")
 
-    def it_is_curried(add):
-        into_array = R.into([])
+    def it_is_curried(add, into_array):
         add2 = R.map(add(2))
         result = into_array(add2)
         eq(result([1, 2, 3, 4]), [3, 4, 5, 6])
@@ -774,6 +773,30 @@ def describe_drop_repeats():
         # eq(get_arity(R.drop_repeats([-0, 0])), 2)
         eq(len(R.drop_repeats([float("nan"), float("nan")])), 1)
         eq(len(R.drop_repeats([just([42]), just([42])])), 1)
+
+
+def describe_drop_while():
+    def it_skips_elements_while_the_function_reports_true():
+        eq(R.drop_while(lambda x: x < 5, [1, 3, 5, 7, 9]), [5, 7, 9])
+
+    def it_returns_an_empty_list_for_an_empty_list():
+        eq(R.drop_while(lambda _: True, []), [])
+        eq(R.drop_while(lambda _: True, []), [])
+
+    def it_starts_at_the_right_arg_and_acknowledges_none():
+        sublist = R.drop_while(lambda x: x is not None, [1, 3, None, 5, 7])
+        eq(len(sublist), 3)
+        eq(sublist[0], None)
+        eq(sublist[1], 5)
+        eq(sublist[2], 7)
+
+    def it_is_curried():
+        drop_lt_7 = R.drop_while(lambda x: x < 7)
+        eq(drop_lt_7([1, 3, 5, 7, 9]), [7, 9])
+        eq(drop_lt_7([2, 4, 6, 8, 10]), [8, 10])
+
+    def it_can_act_as_a_transducer(into_array):
+        eq(into_array(R.drop_while(lambda x: x < 7), [1, 3, 5, 7, 9]), [7, 9])
 
 
 def describe_nth():
