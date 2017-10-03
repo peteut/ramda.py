@@ -9,14 +9,14 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _check_for_method, _xall, _is_transformer, _step_cat, _xmap, _xfilter, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
-    _xdrop_repeats_with, _equals, _xdrop_while
+    _xdrop_repeats_with, _equals, _xdrop_while, _xfind
 from .function import curry_n
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
-           "drop_while", "ends_with",
+           "drop_while", "ends_with", "find",
            "nth", "head"]
 
 
@@ -182,6 +182,14 @@ def drop_while(pred, xs):
 @_curry2
 def ends_with(suffix, xs):
     return _equals(xs[-len(suffix):], suffix)
+
+
+@_curry2
+@_dispatchable(["find"], _xfind)
+def find(fn, xs):
+    for item in xs:
+        if fn(item):
+            return item
 
 
 @_curry2

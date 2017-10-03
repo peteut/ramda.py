@@ -38,6 +38,11 @@ def just():
     return Just
 
 
+@pytest.fixture
+def even():
+    return lambda n: isinstance(n, (int, float)) and n % 2 == 0
+
+
 def describe_adjust():
     @pytest.fixture
     def xs():
@@ -110,10 +115,6 @@ def describe_into():
 
 
 def describe_all():
-    @pytest.fixture
-    def even():
-        return lambda n: n % 2 == 0
-
     @pytest.fixture
     def is_false():
         return lambda x: x is False
@@ -823,6 +824,60 @@ def describe_ends_with():
 
     def it_should_return_false_when_an_array_does_not_end_with_the_provided_values():
         eq(R.ends_with(['a', 'b'], ['a', 'b', 'c']), False)
+
+
+def describe_find():
+    obj1 = {"x": 100}
+    obj2 = {"x": 200}
+    a = [11, 10, 9, 'cow', obj1, 8, 7, 100, 200, 300, obj2, 4, 3, 2, 1, 0]
+
+    @pytest.fixture
+    def is_str():
+        return lambda x: isinstance(x, str)
+
+    @pytest.fixture
+    def gt100():
+        return lambda x: isinstance(x, (int, float)) and x > 100
+
+    @pytest.fixture
+    def x_gt100():
+        def _pred(o):
+            try:
+                return o["x"] > 100
+            except:
+                pass
+        return _pred
+
+    def it_returns_the_first_element_that_satisfies_the_predicate(
+            even, is_str, gt100, x_gt100):
+        eq(R.find(even, a), 10)
+        eq(R.find(gt100, a), 200)
+        eq(R.find(is_str, a), "cow")
+        eq(R.find(x_gt100, a), obj2)
+
+    def it_transduces_the_first_element_that_satisfies_the_predicate_into_an_array(
+            into_array, even, gt100, is_str, x_gt100):
+        eq(into_array(R.find(even), a), [10])
+        eq(into_array(R.find(gt100), a), [200])
+        eq(into_array(R.find(is_str), a), ['cow'])
+        eq(into_array(R.find(x_gt100), a), [obj2])
+
+    def it_returns_none_when_no_element_satisfies_the_predicate(even):
+        eq(R.find(even, ['zing']), None)
+
+    def it_returns_none_in_array_when_no_element_satisfies_the_predicate_into_an_array(
+            into_array, even):
+        eq(into_array(R.find(even), ['zing']), [None])
+
+    def it_returns_none_when_given_an_empty_list(even):
+        eq(R.find(even, []), None)
+
+    def it_returns_none_into_an_array_when_given_an_empty_list(into_array, even):
+        eq(into_array(R.find(even), []), [None])
+
+    def it_is_curried(even):
+        eq(inspect.isfunction(R.find(even)), True)
+        eq(R.find(even)(a), 10)
 
 
 def describe_nth():
