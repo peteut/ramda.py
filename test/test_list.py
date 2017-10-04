@@ -915,6 +915,44 @@ def describe_find_index():
         eq(R.find_index(even)(a), 1)
 
 
+def describe_find_last():
+    obj1 = {"x": 100}
+    obj2 = {"x": 200}
+    a = [11, 10, 9, "cow", obj1, 8, 7, 100, 200, 300, obj2, 4, 3, 2, 1, 0]
+
+    def it_returns_the_index_of_the_last_element_that_satisfies_the_predicate(
+            even, is_str, gt100, x_gt100):
+        eq(R.find_last(even, a), 0)
+        eq(R.find_last(gt100, a), 300)
+        eq(R.find_last(is_str, a), "cow")
+        eq(R.find_last(x_gt100, a), obj2)
+
+    def it_returns_the_last_element_that_satisfies_the_predicate_into_an_array(
+            into_array, even, gt100, is_str, x_gt100):
+        eq(into_array(R.find_last(even), a), [0])
+        eq(into_array(R.find_last(gt100), a), [300])
+        eq(into_array(R.find_last(is_str), a), ["cow"])
+        eq(into_array(R.find_last(x_gt100), a), [obj2])
+
+    def it_returns_none_when_no_element_satisfies_the_predicate(
+            even):
+        eq(R.find_last(even, ["zing"]), None)
+
+    def it_returns_none_into_an_array_when_no_element_satisfies_the_predicate(
+            into_array, even):
+        eq(into_array(R.find_last(even), ["zing"]), [None])
+
+    def it_works_when_the_first_element_matches(even):
+        eq(R.find_last(even, [2, 3, 5]), 2)
+
+    def it_does_not_go_into_an_infinite_loop_on_an_empty_array():
+        eq(R.find_last(even, []), None)
+
+    def it_is_curried(even):
+        eq(inspect.isfunction(R.find_last(even)), True)
+        eq(R.find_last(even)(a), 0)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
