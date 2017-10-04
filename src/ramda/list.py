@@ -18,6 +18,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
+           "flatten",
            "nth", "head"]
 
 
@@ -217,6 +218,9 @@ def find_last_index(fn, xs):
         if fn(item):
             return len(xs) - 1 - idx
     return -1
+
+
+flatten = _curry1(_make_flat(True))
 
 
 @_curry2

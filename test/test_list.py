@@ -992,6 +992,28 @@ def describe_find_last_index():
         eq(R.find_last_index(even)(a), 15)
 
 
+def describe_flatten():
+    def it_turns_a_nested_list_into_one_flat_list():
+        nest = [1, [2], [3, [4, 5], 6, [[[7], 8]]], 9, 10]
+        eq(R.flatten(nest), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+        nest = [[[[3]], 2, 1], 0, [[-1, -2], -3]]
+        eq(R.flatten(nest), [3, 2, 1, 0, -1, -2, -3])
+        eq(R.flatten([1, 2, 3, 4, 5]), [1, 2, 3, 4, 5])
+
+    def it_is_not_destructive(not_equal):
+        nest = [1, [2], [3, [4, 5], 6, [[[7], 8]]], 9, 10]
+        eq(not_equal(R.flatten(nest), nest), True)
+
+    def it_handles_ridiculously_large_inputs():
+        eq(len(R.flatten([
+            [None for _ in range(1000000)], list(range(56000)), 5, 1, 3])),
+            1056003)
+
+    def it_flattens_an_array_of_empty_arrays():
+        eq(R.flatten([[], [], []]), [])
+        eq(R.flatten([]), [])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
