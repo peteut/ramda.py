@@ -43,6 +43,26 @@ def even():
     return lambda n: isinstance(n, (int, float)) and n % 2 == 0
 
 
+@pytest.fixture
+def is_str():
+    return lambda x: isinstance(x, str)
+
+
+@pytest.fixture
+def gt100():
+    return lambda x: isinstance(x, (int, float)) and x > 100
+
+
+@pytest.fixture
+def x_gt100():
+    def _pred(o):
+        try:
+            return o["x"] > 100
+        except:
+            pass
+    return _pred
+
+
 def describe_adjust():
     @pytest.fixture
     def xs():
@@ -724,7 +744,7 @@ def describe_drop_repeats_with():
 
     @pytest.fixture
     def eq_i():
-        return lambda x, y: x["i"] == y["i"]  # FIXME: R.eqProps('i')
+        return lambda x, y: x["i"] == y["i"]  # FIXME: R.eqProps("i")
 
     def it_removes_repeated_elements_based_on_predicate(objs, objs2, eq_i):
         eq(R.drop_repeats_with(eq_i, objs2), objs)
@@ -802,51 +822,34 @@ def describe_drop_while():
 
 def describe_ends_with():
     def it_should_return_true_when_a_string_ends_with_the_provided_value():
-        eq(R.ends_with('c', 'abc'), True)
+        eq(R.ends_with("c", "abc"), True)
 
     def it_should_return_true_when_a_long_string_ends_with_the_provided_value():
-        eq(R.ends_with('ology', 'astrology'), True)
+        eq(R.ends_with("ology", "astrology"), True)
 
     def it_should_return_false_when_a_string_does_not_end_with_the_provided_value():
-        eq(R.ends_with('b', 'abc'), False)
+        eq(R.ends_with("b", "abc"), False)
 
     def it_should_return_false_when_a_long_string_does_not_end_with_the_provided_value():
-        eq(R.ends_with('olog', 'astrology'), False)
+        eq(R.ends_with("olog", "astrology"), False)
 
     def it_should_return_true_when_an_array_ends_with_the_provided_value():
-        eq(R.ends_with(['c'], ['a', 'b', 'c']), True)
+        eq(R.ends_with(["c"], ["a", "b", "c"]), True)
 
     def it_should_return_true_when_an_array_ends_with_the_provided_values():
-        eq(R.ends_with(['b', 'c'], ['a', 'b', 'c']), True)
+        eq(R.ends_with(["b", "c"], ["a", "b", "c"]), True)
 
     def it_should_return_false_when_an_array_does_not_end_with_the_provided_value():
-        eq(R.ends_with(['b'], ['a', 'b', 'c']), False)
+        eq(R.ends_with(["b"], ["a", "b", "c"]), False)
 
     def it_should_return_false_when_an_array_does_not_end_with_the_provided_values():
-        eq(R.ends_with(['a', 'b'], ['a', 'b', 'c']), False)
+        eq(R.ends_with(["a", "b"], ["a", "b", "c"]), False)
 
 
 def describe_find():
     obj1 = {"x": 100}
     obj2 = {"x": 200}
-    a = [11, 10, 9, 'cow', obj1, 8, 7, 100, 200, 300, obj2, 4, 3, 2, 1, 0]
-
-    @pytest.fixture
-    def is_str():
-        return lambda x: isinstance(x, str)
-
-    @pytest.fixture
-    def gt100():
-        return lambda x: isinstance(x, (int, float)) and x > 100
-
-    @pytest.fixture
-    def x_gt100():
-        def _pred(o):
-            try:
-                return o["x"] > 100
-            except:
-                pass
-        return _pred
+    a = [11, 10, 9, "cow", obj1, 8, 7, 100, 200, 300, obj2, 4, 3, 2, 1, 0]
 
     def it_returns_the_first_element_that_satisfies_the_predicate(
             even, is_str, gt100, x_gt100):
@@ -859,15 +862,15 @@ def describe_find():
             into_array, even, gt100, is_str, x_gt100):
         eq(into_array(R.find(even), a), [10])
         eq(into_array(R.find(gt100), a), [200])
-        eq(into_array(R.find(is_str), a), ['cow'])
+        eq(into_array(R.find(is_str), a), ["cow"])
         eq(into_array(R.find(x_gt100), a), [obj2])
 
     def it_returns_none_when_no_element_satisfies_the_predicate(even):
-        eq(R.find(even, ['zing']), None)
+        eq(R.find(even, ["zing"]), None)
 
     def it_returns_none_in_array_when_no_element_satisfies_the_predicate_into_an_array(
             into_array, even):
-        eq(into_array(R.find(even), ['zing']), [None])
+        eq(into_array(R.find(even), ["zing"]), [None])
 
     def it_returns_none_when_given_an_empty_list(even):
         eq(R.find(even, []), None)
@@ -878,6 +881,38 @@ def describe_find():
     def it_is_curried(even):
         eq(inspect.isfunction(R.find(even)), True)
         eq(R.find(even)(a), 10)
+
+
+def describe_find_index():
+    obj1 = {"x": 100}
+    obj2 = {"x": 200}
+    a = [11, 10, 9, "cow", obj1, 8, 7, 100, 200, 300, obj2, 4, 3, 2, 1, 0]
+
+    def it_returns_the_index_of_the_first_element_that_satisfies_the_predicate(
+            even, is_str, gt100, x_gt100):
+        eq(R.find_index(even, a), 1)
+        eq(R.find_index(gt100, a), 8)
+        eq(R.find_index(is_str, a), 3)
+        eq(R.find_index(x_gt100, a), 10)
+
+    def it_returns_the_index_of_the_first_element_that_satisfies_the_predicate_into_an_array(
+            into_array, even, gt100, is_str, x_gt100):
+        eq(into_array(R.find_index(even), a), [1])
+        eq(into_array(R.find_index(gt100), a), [8])
+        eq(into_array(R.find_index(is_str), a), [3])
+        eq(into_array(R.find_index(x_gt100), a), [10])
+
+    def it_returns_minus_1_when_no_element_satisfies_the_predicate(even):
+        eq(R.find_index(even, ["zing"]), -1)
+        eq(R.find_index(even, []), -1)
+
+    def it_returns_minus_1_in_array_when_no_element_satisfies_the_predicate_into_an_array(
+            into_array, even):
+        eq(into_array(R.find_index(even), ["zing"]), [-1])
+
+    def it_is_curried(even):
+        eq(inspect.isfunction(R.find_index(even)), True)
+        eq(R.find_index(even)(a), 1)
 
 
 def describe_nth():
