@@ -1,5 +1,6 @@
 import types
 import inspect
+import collections
 import pytest
 import ramda as R
 from ramda.shared import eq
@@ -114,7 +115,11 @@ def describe_into():
            {"a": 1, "b": 2, "c": 3})
 
     def it_dispatches_to_objects_that_implement_reduce(add, is_odd):
-        obj = {"x": [1, 2, 3], "reduce": lambda *_: "override"}
+        class MapWithReduce(collections.UserDict):
+            def reduce(self, acc, item):
+                return "override"
+
+        obj = MapWithReduce(x=[1, 2, 3])
         eq(R.into([], R.map(add(1)), obj), "override")
         eq(R.into([], R.filter(is_odd), obj), "override")
 
@@ -325,7 +330,7 @@ def describe_filter():
         eq(R.filter(positive, {"x": 1, "y": 2, "z": 3}), {"x": 1, "y": 2, "z": 3})
 
     def it_dispatches_to_passed_in_non_Array_object_with_a_filter_method():
-        f = {"filter": lambda f: f("called f.filter")}
+        f = types.SimpleNamespace(filter=lambda _: "called f.filter")
         eq(R.filter(R.identity, f), "called f.filter")
 
     def it_is_curried(even):
@@ -578,8 +583,11 @@ def describe_chain():
         eq(R.chain(R.append, R.head)([1, 2, 3]), [1, 2, 3, 1])
 
     def it_dispatches_to_objects_that_implement_chain(add1):
-        obj = {"x": 100}
-        obj["chain"] = lambda f: f(obj["x"])
+        class MappingWithChain(collections.UserDict):
+            def chain(self, fn):
+                return fn(self["x"])
+
+        obj = MappingWithChain(x=100)
         eq(R.chain(add1, obj), [101])
 
     def it_dispatches_to_transformer_objects(add1):
@@ -1012,6 +1020,45 @@ def describe_flatten():
     def it_flattens_an_array_of_empty_arrays():
         eq(R.flatten([[], [], []]), [])
         eq(R.flatten([]), [])
+
+
+def describe_for_each():
+    xs = [{"x": 1, "y": 2}, {"x": 100, "y": 200}, {"x": 300, "y": 400}, {"x": 234, "y": 345}]
+
+    def it_performs_the_passed_in_function_on_each_element_of_the_list():
+        side_effect = {}
+
+        def do(elem):
+            side_effect[elem["x"]] = elem["y"]
+
+        R.for_each(do, xs)
+        eq(side_effect, {1: 2, 100: 200, 300: 400, 234: 345})
+
+    def it_returns_the_original_list():
+        s = ""
+
+        def do(obj):
+            nonlocal s
+            s += str(obj["x"])
+
+        eq(R.for_each(do, xs), xs)
+        eq("1100300234", s)
+
+    def it_handles_empty_list():
+        eq(R.for_each(lambda x: x * x, []), [])
+
+    def it_dispatches_to_for_each_method():
+        dispatched = False
+        fn = lambda x: None
+
+        class DummyList():
+            def for_each(self, callback):
+                nonlocal dispatched
+                dispatched = True
+                eq(callback, fn)
+
+        R.for_each(fn, DummyList())
+        eq(dispatched, True)
 
 
 def describe_nth():

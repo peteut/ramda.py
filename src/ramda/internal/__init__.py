@@ -225,13 +225,13 @@ def _reduce(fn, acc, xs):
 
     def _method_reduce(xf, acc, obj, method_name):
         return xf._transducer_result(
-            obj[method_name](xf._transducer_step, acc))
+            getattr(obj, method_name)(xf._transducer_step, acc))
 
     if isinstance(fn, collections.Callable):
         fn = _xwrap(fn)
 
     if isinstance(xs, collections.Mapping) and isinstance(
-            xs.get("reduce"), collections.Callable):
+            getattr(xs, "reduce", None), collections.Callable):
         return _method_reduce(fn, acc, xs, "reduce")
 
     if isinstance(xs, collections.Iterable):
@@ -362,10 +362,9 @@ def _dispatchable(method_names, xf, fn):
         if len(args) == 0:
             return fn()
         obj = args[-1]
-        if isinstance(obj, collections.Mapping):
-            for method_name in method_names:
-                if isinstance(obj.get(method_name), collections.Callable):
-                    return obj.get(method_name)(*args[:-1])
+        for method_name in method_names:
+            if isinstance(getattr(obj, method_name, None), collections.Callable):
+                return getattr(obj, method_name)(*args[:-1])
         if _is_transformer(obj):
             transducer = xf(*args[:-1])
             return transducer(obj)
@@ -409,10 +408,10 @@ def _check_for_method(method_name, fn):
         if len(args) == 0:
             return fn()
         obj = args[-1]
-        if not isinstance(obj, collections.Mapping) or \
-                not isinstance(obj.get(method_name), collections.Callable):
+        if not hasattr(obj, method_name) or \
+                not isinstance(getattr(obj, method_name), collections.Callable):
             return fn(*args)
-        return obj.get(method_name)(*args[:-1])
+        return getattr(obj, method_name)(*args[:-1])
     return _fn
 
 
