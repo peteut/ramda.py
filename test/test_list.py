@@ -1061,6 +1061,15 @@ def describe_for_each():
         eq(dispatched, True)
 
 
+def describe_from_pairs():
+    def it_combines_an_array_of_two_element_arrays_into_an_object():
+        eq(R.from_pairs([["a", 1], ["b", 2], ["c", 3]]),
+           {"a": 1, "b": 2, "c": 3})
+
+    def it_gives_later_entries_precedence_over_earlier_ones():
+        eq(R.from_pairs([["x", 1], ["x", 2]]), {"x": 2})
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
