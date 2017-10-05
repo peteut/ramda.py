@@ -64,6 +64,32 @@ def x_gt100():
     return _pred
 
 
+@pytest.fixture
+def grade():
+    return lambda score: "F" if score < 65 else "D" if score < 70 else "C" if score < 80 \
+        else "B" if score < 90 else "A"
+
+
+@pytest.fixture
+def students():
+    return [
+        {"name": "Abby", "score": 84},
+        {"name": "Brad", "score": 73},
+        {"name": "Chris", "score": 89},
+        {"name": "Dianne", "score": 99},
+        {"name": "Eddy", "score": 58},
+        {"name": "Fred", "score": 66},
+        {"name": "Gillian", "score": 91},
+        {"name": "Hannah", "score": 78},
+        {"name": "Irene", "score": 85},
+        {"name": "Jack", "score": 69}]
+
+
+@pytest.fixture
+def by_grade(grade):
+    return lambda student: grade(student.get("score", -1))
+
+
 def describe_adjust():
     @pytest.fixture
     def xs():
@@ -417,21 +443,8 @@ def describe_reduce_by():
             {"type": "C", "val": 50},
             {"type": "B", "val": 60}]
 
-    def it_splits_the_list_into_groups_according_to_the_grouping_function():
-        grade = lambda score: "F" if score < 65 else "D" if score < 70 else "C" if score < 80 \
-            else "B" if score < 90 else "A"
-        students = [
-            {"name": "Abby", "score": 84},
-            {"name": "Brad", "score": 73},
-            {"name": "Chris", "score": 89},
-            {"name": "Dianne", "score": 99},
-            {"name": "Eddy", "score": 58},
-            {"name": "Fred", "score": 66},
-            {"name": "Gillian", "score": 91},
-            {"name": "Hannah", "score": 78},
-            {"name": "Irene", "score": 85},
-            {"name": "Jack", "score": 69}]
-        by_grade = lambda student: grade(student.get("score", -1))
+    def it_splits_the_list_into_groups_according_to_the_grouping_function(
+            grade, students, by_grade):
         collect_names = lambda acc, student: acc.append(student["name"]) or acc
 
         eq(R.reduce_by(collect_names, [], by_grade, students), {
@@ -1068,6 +1081,48 @@ def describe_from_pairs():
 
     def it_gives_later_entries_precedence_over_earlier_ones():
         eq(R.from_pairs([["x", 1], ["x", 2]]), {"x": 2})
+
+
+def describe_group_by():
+    @pytest.fixture
+    def xf():
+        return types.SimpleNamespace(
+            _transducer_init=R.always({}),
+            _transducer_result=R.identity,
+            _transducer_step=lambda result, input: result.apend(input) or result)
+
+    def it_splits_the_list_into_groups_according_to_the_grouping_function(
+            grade, students, by_grade):
+        eq(R.group_by(by_grade, students), {
+            "A": [{"name": "Dianne", "score": 99}, {"name": "Gillian", "score": 91}],
+            "B": [{"name": "Abby", "score": 84}, {"name": "Chris", "score": 89},
+                  {"name": "Irene", "score": 85}],
+            "C": [{"name": "Brad", "score": 73}, {"name": "Hannah", "score": 78}],
+            "D": [{"name": "Fred", "score": 66}, {"name": "Jack", "score": 69}],
+            "F": [{"name": "Eddy", "score": 58}]
+        })
+
+    def it_is_curried():
+        split_by_type = R.group_by(lambda obj: obj["type"])
+        eq(split_by_type([
+            {"type": "A", "val": 10},
+            {"type": "B", "val": 20},
+            {"type": "A", "val": 30},
+            {"type": "A", "val": 40},
+            {"type": "C", "val": 50},
+            {"type": "B", "val": 60}
+        ]), {
+            "A": [{"type": "A", "val": 10}, {"type": "A", "val": 30}, {"type": "A", "val": 40}],
+            "B": [{"type": "B", "val": 20}, {"type": "B", "val": 60}],
+            "C": [{"type": "C", "val": 50}]
+        })
+
+    def it_returns_an_empty_object_if_given_an_empty_array():
+        eq(R.group_by(lambda obj: obj["x"], []), {})
+
+    def it_dispatches_on_transformer_objects_in_list_position(xf):
+        by_type = lambda obj: obj["type"]
+        eq(_is_transformer(R.group_by(by_type, xf)), True)
 
 
 def describe_nth():
