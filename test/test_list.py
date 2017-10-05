@@ -1109,7 +1109,7 @@ def describe_group_by():
         })
 
     def it_is_curried():
-        split_by_type = R.group_by(lambda obj: obj["type"])
+        split_by_type = R.group_by(R.prop("type"))
         eq(split_by_type([
             {"type": "A", "val": 10},
             {"type": "B", "val": 20},
@@ -1158,6 +1158,34 @@ def describe_group_with():
     def it_also_works_on_strings():
         eq(R.group_with(R.equals)("Mississippi"),
            ["M", "i", "ss", "i", "ss", "i", "pp", "i"])
+
+
+def describe_index_by():
+    @pytest.fixture
+    def xs():
+        return [{"id": "xyz", "title": "A"}, {"id": "abc", "title": "B"}]
+
+    def it_indexes_list_by_the_given_property(xs):
+        indexed = R.index_by(R.prop("id"), xs)
+        eq(indexed, {"abc": {"id": "abc", "title": "B"}, "xyz": {"id": "xyz", "title": "A"}})
+
+    def it_indexes_list_by_the_given_property_upper_case(xs):
+        indexed = R.index_by(R.compose(lambda s: s.upper(), R.prop("id")), xs)
+        eq(indexed, {"ABC": {"id": "abc", "title": "B"}, "XYZ": {"id": "xyz", "title": "A"}})
+
+    def it_is_curried(xs):
+        indexed = R.index_by(R.prop("id"))(xs)
+        eq(indexed, {"abc": {"id": "abc", "title": "B"}, "xyz": {"id": "xyz", "title": "A"}})
+
+    def it_can_act_as_a_transducer(xs):
+        transducer = R.compose(
+            R.index_by(R.prop("id")),
+            R.map(R.pipe(
+                R.adjust(lambda s: s.upper(), 0),
+                R.adjust(R.omit(["id"]), 1)
+            )))
+        result = R.into({}, transducer, xs)
+        eq(result, {"ABC": {"title": "B"}, "XYZ": {"title": "A"}})
 
 
 def describe_nth():

@@ -18,7 +18,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "reduce_by", "reduced", "reduce_right", "aperture", "append", "chain", "contains",
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
-           "flatten", "for_each", "from_pairs", "group_by", "group_with",
+           "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "nth", "head"]
 
 
@@ -255,6 +255,9 @@ def group_with(fn, xs):
         res.append(xs[idx: nextidx])
         idx = nextidx
     return res
+
+
+index_by = reduce_by(lambda acc, elem: elem, None)
 
 
 @_curry2
