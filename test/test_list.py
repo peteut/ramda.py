@@ -1,6 +1,7 @@
 import types
 import inspect
 import collections
+import itertools
 import pytest
 import ramda as R
 from ramda.shared import eq
@@ -10,6 +11,11 @@ from .common import list_xf, get_arity, _is_transformer
 @pytest.fixture
 def T():
     return lambda *_: True
+
+
+@pytest.fixture
+def F():
+    return lambda *_: False
 
 
 @pytest.fixture
@@ -1123,6 +1129,35 @@ def describe_group_by():
     def it_dispatches_on_transformer_objects_in_list_position(xf):
         by_type = lambda obj: obj["type"]
         eq(_is_transformer(R.group_by(by_type, xf)), True)
+
+
+def describe_group_with():
+    def it_splits_the_list_into_groups_according_to_the_grouping_function():
+        eq(R.group_with(R.equals, [1, 2, 2, 3]), [[1], [2, 2], [3]])
+        eq(R.group_with(R.equals, [1, 1, 1, 1]), [[1, 1, 1, 1]])
+        eq(R.group_with(R.equals, [1, 2, 3, 4]), [[1], [2], [3], [4]])
+
+    def it_splits_the_list_into_streaks_testing_adjacent_elements():
+        is_consecutive = lambda a, b: a + 1 == b
+        eq(R.group_with(is_consecutive, []), [])
+        eq(R.group_with(is_consecutive, [4, 3, 2, 1]), [[4], [3], [2], [1]])
+        eq(R.group_with(is_consecutive, [1, 2, 3, 4]), [[1, 2, 3, 4]])
+        eq(R.group_with(is_consecutive, [1, 2, 2, 3]), [[1, 2], [2, 3]])
+        eq(R.group_with(is_consecutive, [1, 2, 9, 3, 4]), [[1, 2], [9], [3, 4]])
+
+    def it_returns_an_empty_array_if_given_an_empty_array():
+        eq(R.group_with(R.equals, []), [])
+
+    def it_can_be_turned_into_the_original_list_through_concatenation(T, F):
+        xs = [1, 1, 2, 3, 4, 4, 5, 5]
+        unnest = lambda xs: list(itertools.chain.from_iterable(xs))
+        eq(unnest(R.group_with(R.equals, xs)), xs)
+        eq(unnest(R.group_with(T, xs)), xs)
+        eq(unnest(R.group_with(F, xs)), xs)
+
+    def it_also_works_on_strings():
+        eq(R.group_with(R.equals)("Mississippi"),
+           ["M", "i", "ss", "i", "ss", "i", "pp", "i"])
 
 
 def describe_nth():
