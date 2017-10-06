@@ -54,7 +54,8 @@ def _equals(a, b, stack_a=[], stack_b=[]):
     if isinstance(a, (int, float, str)):
         if not (type(a) == type(b) and _identical(a, b)):
             return False
-
+    if isinstance(a, collections.Callable) and isinstance(b, collections.Callable):
+        return id(a) == id(b)
     keys_a = _keys(a)
     if len(keys_a) != len(_keys(b)):
         return False
