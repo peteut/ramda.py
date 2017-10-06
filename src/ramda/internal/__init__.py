@@ -569,7 +569,7 @@ def _xchain(f, xf):
 
 
 def _index_of(xs, a, idx):
-    for idx, item in enumerate(xs):
+    for idx, item in enumerate(xs[idx:], idx):
         if _equals(item, a):
             return idx
     return -1
