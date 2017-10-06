@@ -1188,6 +1188,92 @@ def describe_index_by():
         eq(result, {"ABC": {"title": "B"}, "XYZ": {"title": "A"}})
 
 
+def describe_index_of():
+    @pytest.fixture
+    def xs():
+        return [0, 10, 20, 30]
+
+    @pytest.fixture
+    def input():
+        return [1, 2, 3, 4, 5]
+
+    @pytest.fixture
+    def xs2():
+        return [1, 2, 3]
+
+    def it_returns_a_number_indicating_an_object_s_position_in_a_list(xs):
+        eq(R.index_of(30, xs), 3)
+
+    def it_returns_minus_1_if_the_object_is_not_in_the_list(xs):
+        eq(R.index_of(40, xs), -1)
+
+    def it_returns_the_index_of_the_first_item(input):
+        eq(R.index_of(1, input), 0)
+
+    def it_returns_the_index_of_the_last_item(input):
+        eq(R.index_of(5, input), 4)
+
+    def it_finds_1(xs2):
+        eq(R.index_of(1, xs2), 0)
+
+    def it_finds_1_and_is_result_strictly_it(xs2):
+        eq(R.index_of(1, xs2), 0)
+
+    def it_does_not_find_4(xs2):
+        eq(R.index_of(4, xs2), -1)
+
+    def it_does_not_consider_str_1_equal_to_1(xs2):
+        eq(R.index_of("1", xs2), -1)
+
+    def it_returns_minus_1_for_an_empty_array():
+        eq(R.index_of("x", []), -1)
+
+    def it_dispatches_to_index_of_method():
+        class Empty():
+            def index_of(self, value):
+                return -1
+
+        class List():
+            def __init__(self, head, tail):
+                self.head = head
+                self.tail = tail
+
+            def index_of(self, value):
+                idx = self.tail.index_of(value)
+                return 0 if self.head == value \
+                    else 1 + idx if idx >= 0 else -1
+
+        xs = List("b",
+                  List("a",
+                       List("n",
+                            List("a",
+                                 List("n",
+                                      List("a",
+                                           Empty()))))))
+
+        eq(R.index_of("a", "banana"), 1)
+        eq(R.index_of("x", "banana"), -1)
+        eq(R.index_of("a", xs), 1)
+        eq(R.index_of("x", xs), -1)
+
+    def it_is_curried(xs2):
+        curried = R.index_of(3)
+        eq(curried(xs2), 2)
+
+    def it_finds_function_compared_by_identity():
+        f = lambda *_: None
+        g = lambda *_: None
+        xs = [g, f, g, f]
+        eq(R.index_of(f, xs), 1)
+
+    def it_does_not_find_function_compared_by_identity():
+        f = lambda *_: None
+        g = lambda *_: None
+        h = lambda *_: None
+        xs = [g, f]
+        eq(R.index_of(h, xs), -1)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

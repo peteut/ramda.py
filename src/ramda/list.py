@@ -10,7 +10,7 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
     _xdrop_repeats_with, _equals, _xdrop_while, _xfind, _xfind_index, _xfind_last, \
-    _xfind_last_index
+    _xfind_last_index, _index_of
 from .function import curry_n
 
 
@@ -19,6 +19,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
+           "index_of",
            "nth", "head"]
 
 
@@ -258,6 +259,13 @@ def group_with(fn, xs):
 
 
 index_by = reduce_by(lambda acc, elem: elem, None)
+
+
+@_curry2
+def index_of(target, xs):
+    return xs.index_of(target) \
+        if isinstance(getattr(xs, "index_of", None), collections.Callable) else \
+        _index_of(xs, target, 0)
 
 
 @_curry2
