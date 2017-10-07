@@ -19,7 +19,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
-           "index_of",
+           "index_of", "init",
            "nth", "head"]
 
 
@@ -266,6 +266,15 @@ def index_of(target, xs):
     return xs.index_of(target) \
         if isinstance(getattr(xs, "index_of", None), collections.Callable) else \
         _index_of(xs, target, 0)
+
+
+@_curry3
+@_check_for_method("slice")
+def slice(from_index, to_index, xs):
+    return xs[from_index: to_index]
+
+
+init = slice(0, -1)
 
 
 @_curry2

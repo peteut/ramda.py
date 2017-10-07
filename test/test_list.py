@@ -1274,6 +1274,34 @@ def describe_index_of():
         eq(R.index_of(h, xs), -1)
 
 
+def describe_init():
+    def it_returns_all_but_the_last_element_of_an_ordered_collection():
+        eq(R.init([1, 2, 3]), [1, 2])
+        eq(R.init([2, 3]), [2])
+        eq(R.init([3]), [])
+        eq(R.init([]), [])
+
+        eq(R.init('abc'), 'ab')
+        eq(R.init('bc'), 'b')
+        eq(R.init('c'), '')
+        eq(R.init(''), '')
+
+    def it_throws_if_applied_to_null_or_none():
+        with pytest.raises(TypeError):
+            R.init(None)
+
+    def it_handles_array_like_object():
+        class ArrayLike():
+            def __init__(self, *args):
+                self.args = list(args)
+
+            def slice(self, from_index, to_index):
+                return self.args[from_index: to_index]
+
+        args = ArrayLike(1, 2, 3, 4, 5)
+        eq(R.init(args), [1, 2, 3, 4])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
