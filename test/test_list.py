@@ -1281,10 +1281,10 @@ def describe_init():
         eq(R.init([3]), [])
         eq(R.init([]), [])
 
-        eq(R.init('abc'), 'ab')
-        eq(R.init('bc'), 'b')
-        eq(R.init('c'), '')
-        eq(R.init(''), '')
+        eq(R.init("abc"), "ab")
+        eq(R.init("bc"), "b")
+        eq(R.init("c"), "")
+        eq(R.init(""), "")
 
     def it_throws_if_applied_to_null_or_none():
         with pytest.raises(TypeError):
@@ -1300,6 +1300,25 @@ def describe_init():
 
         args = ArrayLike(1, 2, 3, 4, 5)
         eq(R.init(args), [1, 2, 3, 4])
+
+
+def describe_insert():
+    @pytest.fixture
+    def xs():
+        return ["a", "b", "c", "d", "e"]
+
+    def it_inserts_an_element_into_the_given_list(xs):
+        eq(R.insert(2, "x", xs), ["a", "b", "x", "c", "d", "e"])
+
+    def it_inserts_another_list_as_an_element(xs):
+        eq(R.insert(2, ["s", "t"], xs), ["a", "b", ["s", "t"], "c", "d", "e"])
+
+    def it_appends_to_the_end_of_the_list_if_the_index_is_too_large(xs):
+        eq(R.insert(8, "z", xs), ["a", "b", "c", "d", "e", "z"])
+
+    def it_is_curried(xs):
+        eq(R.insert(8)("z")(xs), ["a", "b", "c", "d", "e", "z"])
+        eq(R.insert(8, "z")(xs), ["a", "b", "c", "d", "e", "z"])
 
 
 def describe_nth():

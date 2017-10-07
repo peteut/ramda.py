@@ -19,7 +19,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
-           "index_of", "init",
+           "index_of", "init", "insert",
            "nth", "head"]
 
 
@@ -275,6 +275,14 @@ def slice(from_index, to_index, xs):
 
 
 init = slice(0, -1)
+
+
+@_curry3
+def insert(idx, elt, xs):
+    idx = idx if len(xs) and idx >= 0 else len(xs)
+    result = xs[:]
+    result.insert(idx, elt)
+    return result
 
 
 @_curry2
