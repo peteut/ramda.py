@@ -19,7 +19,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
-           "index_of", "init", "insert",
+           "index_of", "init", "insert", "insert_all",
            "nth", "head"]
 
 
@@ -283,6 +283,12 @@ def insert(idx, elt, xs):
     result = xs[:]
     result.insert(idx, elt)
     return result
+
+
+@_curry3
+def insert_all(idx, elts, xs):
+    idx = idx if len(xs) and idx >= 0 else len(xs)
+    return xs[: idx] + elts + xs[idx:]
 
 
 @_curry2

@@ -1321,6 +1321,21 @@ def describe_insert():
         eq(R.insert(8, "z")(xs), ["a", "b", "c", "d", "e", "z"])
 
 
+def describe_insert_all():
+    @pytest.fixture
+    def xs():
+        return ["a", "b", "c", "d", "e"]
+
+    def it_inserts_a_list_of_elements_into_the_given_list(xs):
+        eq(R.insert_all(2, ["x", "y", "z"], xs), ["a", "b", "x", "y", "z", "c", "d", "e"])
+
+    def it_appends_to_the_end_of_the_list_if_the_index_is_too_large(xs):
+        eq(R.insert_all(8, ["p", "q", "r"], xs), ["a", "b", "c", "d", "e", "p", "q", "r"])
+
+    def it_is_curried(xs):
+        eq(R.insert_all(8)(["p", "q", "r"], xs), ["a", "b", "c", "d", "e", "p", "q", "r"])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
