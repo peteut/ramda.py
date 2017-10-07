@@ -1336,6 +1336,23 @@ def describe_insert_all():
         eq(R.insert_all(8)(["p", "q", "r"], xs), ["a", "b", "c", "d", "e", "p", "q", "r"])
 
 
+def describe_intersperse():
+    def it_interposes_a_separator_between_list_items():
+        eq(R.intersperse("n", ["ba", "a", "a"]), ["ba", "n", "a", "n", "a"])
+        eq(R.intersperse("bar", ["foo"]), ["foo"])
+        eq(R.intersperse("bar", []), [])
+
+    def it_dispatches():
+        class Intersperse():
+            def intersperse(self, x):
+                return "override {}".format(x)
+
+        eq(R.intersperse("x", Intersperse()), "override x")
+
+    def it_is_curried():
+        eq(R.intersperse("n")(["ba", "a", "a"]), ["ba", "n", "a", "n", "a"])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
