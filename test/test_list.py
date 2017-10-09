@@ -1359,6 +1359,23 @@ def describe_join():
         eq(R.join("~", xs), "1~2~3~4")
 
 
+def describe_last():
+    def it_returns_the_first_element_of_an_ordered_collection():
+        eq(R.last([1, 2, 3]), 3)
+        eq(R.last([1, 2]), 2)
+        eq(R.last([1]), 1)
+        eq(R.last([]), None)
+
+        eq(R.last("abc"), "c")
+        eq(R.last("ab"), "b")
+        eq(R.last("a"), "a")
+        eq(R.last(""), "")
+
+    def it_throws_if_applied_to_none():
+        with pytest.raises(TypeError):
+            R.last(None)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

@@ -19,7 +19,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
-           "index_of", "init", "insert", "insert_all", "intersperse", "join",
+           "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "nth", "head"]
 
 
@@ -313,5 +313,7 @@ def nth(offset, xs):
     except IndexError:
         return "" if isinstance(xs, str) else None
 
+
+last = nth(-1)
 
 head = nth(0)
