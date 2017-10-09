@@ -262,10 +262,9 @@ index_by = reduce_by(lambda acc, elem: elem, None)
 
 
 @_curry2
+@_check_for_method("index_of")
 def index_of(target, xs):
-    return xs.index_of(target) \
-        if isinstance(getattr(xs, "index_of", None), collections.Callable) else \
-        _index_of(xs, target, 0)
+    return _index_of(xs, target, 0)
 
 
 @_curry3
