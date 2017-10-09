@@ -6,7 +6,6 @@ from .common import get_arity
 
 
 def describe_curry_n():
-
     @pytest.fixture
     def source():
         def _source(*args):
@@ -33,7 +32,6 @@ def describe_curry_n():
 
 @pytest.mark.skip()
 def describe_add_index():
-
     @pytest.fixture
     def map_indexed():
         return R.add_index(R.map)
@@ -48,7 +46,6 @@ def describe_add_index():
 
 
 def describe_pipe():
-
     def it_is_a_variadic_function():
         eq(inspect.isfunction(R.pipe), True)
         eq(inspect.getargspec(R.pipe).args, [])
@@ -73,7 +70,6 @@ def describe_pipe():
 
 
 def describe_compose():
-
     def is_a_variadic_function():
         eq(inspect.isfunction(R.compose), True)
         eq(inspect.getargspec(R.compose).args, [])
@@ -95,3 +91,36 @@ def describe_compose():
         g = R.compose(f)
         eq(get_arity(g), 3)
         eq(g(1, 2, 3), [1, 2, 3])
+
+
+def describe_invoker():
+    @pytest.fixture
+    def concat2():
+        return R.invoker(2, "concat")
+
+    @pytest.fixture
+    def add2():
+        return R.invoker(1, "__add__")
+
+    def it_return_a_function_with_correct_arity(concat2):
+        eq(get_arity(concat2), 3)
+
+    def it_calls_the_method_on_the_object(add2):
+        eq(add2([3, 4], [1, 2]), [1, 2, 3, 4])
+
+    def it_throws_a_descriptive_type_error_if_method_does_not_exist():
+        with pytest.raises(TypeError,
+                           message="None does not habve a method named \"foo\""):
+            R.invoker(0, "foo")(None)
+
+        with pytest.raises(TypeError,
+                           message="[1, 2, 3] does not have a method named \"foo\""):
+            R.invoker(0, "foo")([1, 2, 3])
+
+        with pytest.raises(TypeError,
+                           message="[1, 2, 3] does not have a method named \"length\""):
+            R.invoker(0, "length")([1, 2, 3])
+
+    def it_curries_the_method_call(add2):
+        eq(add2()([3, 4])([1, 2]), [1, 2, 3, 4])
+        eq(add2([3, 4])([1, 2]), [1, 2, 3, 4])

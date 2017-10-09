@@ -1,11 +1,11 @@
 import inspect
-from .internal import _curry1, _curry2, _curry_n, _arity, _concat, _identity, \
+import collections
+from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
     _pipe, _reduce
 
 
-__all__ = ["always", "curry_n", "identity", "always", "pipe", "compose"]
-
-
+__all__ = ["always", "curry_n", "identity", "always", "pipe", "compose",
+           "invoker"]
 
 
 @_curry2
@@ -36,3 +36,15 @@ def compose(*args):
     if len(args) == 0:
         raise ValueError("compose requires at least one argument")
     return pipe(*reversed(args))
+
+
+@_curry2
+def invoker(arity, method):
+    def fn(*args):
+        target = args[arity] if len(args) > arity else None
+        if target and isinstance(getattr(target, method, None), collections.Callable):
+            return getattr(target, method)(*args[:arity])
+        raise TypeError("{} does not have a method named \"{}\"".format(
+            target, method))
+
+    return curry_n(arity + 1, fn)
