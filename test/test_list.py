@@ -1353,6 +1353,12 @@ def describe_intersperse():
         eq(R.intersperse("n")(["ba", "a", "a"]), ["ba", "n", "a", "n", "a"])
 
 
+def describe_join():
+    def it_concatenates_a_list_s_elements_to_a_string_with_an_separator_string_between_elements():
+        xs = [1, 2, 3, 4]
+        eq(R.join("~", xs), "1~2~3~4")
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

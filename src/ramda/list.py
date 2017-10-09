@@ -11,7 +11,7 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
     _xdrop_repeats_with, _equals, _xdrop_while, _xfind, _xfind_index, _xfind_last, \
     _xfind_last_index, _index_of
-from .function import curry_n
+from .function import curry_n, invoker
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
@@ -19,7 +19,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop", "drop_last", "drop_last_while", "drop_repeats_with", "drop_repeats",
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
-           "index_of", "init", "insert", "insert_all", "intersperse",
+           "index_of", "init", "insert", "insert_all", "intersperse", "join",
            "nth", "head"]
 
 
@@ -299,6 +299,11 @@ def intersperse(seperator, xs):
             None,
             itertools.chain.from_iterable(
                 itertools.zip_longest(xs, itertools.repeat(seperator, len(xs) - 1)))))
+
+
+@_curry2
+def join(seperator, xs):
+    return invoker(1, "join")(builtins.map(str, xs))(seperator)
 
 
 @_curry2
