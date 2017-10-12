@@ -1448,6 +1448,32 @@ def describe_last_index_of():
         eq(R.last_index_of(h, xs), -1)
 
 
+def describe_length():
+    def it_returns_the_length_of_a_list():
+        eq(R.length([]), 0)
+        eq(R.length(["a", "b", "c", "d"]), 4)
+
+    def it_returns_the_length_of_a_string():
+        eq(R.length(""), 0)
+        eq(R.length("xyz"), 3)
+
+    def it_returns_the_length_of_a_function():
+        eq(R.length(lambda: None), 0)
+        eq(R.length(lambda x, y, z: z), 3)
+
+    def it_returns_nan_for_value_of_unexpected_type():
+        eq(R.equals(float("nan"), R.length(0)), True)
+        eq(R.equals(float("nan"), R.length({})), True)
+        eq(R.equals(float("nan"), R.length(None)), True)
+
+    def it_returns_nan_for_length_property_of_unexpected_type():
+        eq(R.equals(float("nan"), R.length(types.SimpleNamespace(length=""))), True)
+        eq(R.equals(float("nan"), R.length(types.SimpleNamespace(length="1.23"))), True)
+        eq(R.equals(float("nan"), R.length(types.SimpleNamespace(length=None))), True)
+        eq(R.equals(float("nan"), R.length(types.SimpleNamespace(length=None))), True)
+        eq(R.equals(float("nan"), R.length(types.SimpleNamespace())), True)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

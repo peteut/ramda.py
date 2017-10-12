@@ -20,7 +20,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
-           "last_index_of",
+           "last_index_of", "length",
            "nth", "head"]
 
 
@@ -324,6 +324,15 @@ def last_index_of(target, xs):
         if _equals(item, target):
             return len(xs) - 1 - idx
     return -1
+
+
+@_curry1
+def length(xs):
+    return len(xs) if isinstance(xs, collections.Sequence) \
+        else len(inspect.signature(xs).parameters) \
+        if isinstance(xs, collections.Callable) \
+        else xs.length if hasattr(xs, "length") and isinstance(xs.length, int) \
+        else float("nan")
 
 
 head = nth(0)
