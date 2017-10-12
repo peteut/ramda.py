@@ -1376,6 +1376,78 @@ def describe_last():
             R.last(None)
 
 
+def describe_last_index_of():
+    @pytest.fixture
+    def input():
+        return [1, 2, 3, 4, 5, 1]
+
+    def it_returns_a_number_indicating_an_object_s_last_position_in_a_list():
+        xs = [0, 10, 20, 30, 0, 10, 20, 30, 0, 10]
+        eq(R.last_index_of(30, xs), 7)
+
+    def it_returns_minus_l_if_the_object_is_not_in_the_list():
+        xs = [0, 10, 20, 30]
+        eq(R.last_index_of(40, xs), -1)
+
+    def it_returns_the_last_index_of_the_first_item(input):
+        eq(R.last_index_of(1, input), 5)
+
+    def it_returns_the_index_of_the_last_item(input):
+        eq(R.last_index_of(5, input), 4)
+
+    def it_returns_minus_1_for_an_empty_array():
+        eq(R.last_index_of("x", []), -1)
+
+    def it_has_r_equals_semantics(just):
+        eq(R.last_index_of(float("nan"), [float("nan")]), 0)
+        eq(R.last_index_of(just([42]), [just([42])]), 0)
+
+    def it_dispatches_to_last_index_of_method():
+        class Empty():
+            def last_index_of(self, value):
+                return -1
+
+        class List():
+            def __init__(self, head, tail):
+                self.head = head
+                self.tail = tail
+
+            def last_index_of(self, value):
+                idx = self.tail.last_index_of(value)
+                return 1 + idx if idx >= 0 else \
+                    0 if self.head == value else -1
+
+        xs = List("b",
+                  List("a",
+                       List("n",
+                            List("a",
+                                 List("n",
+                                      List("a",
+                                           Empty()))))))
+        eq(R.last_index_of("a", "banana"), 5)
+        eq(R.last_index_of("x", "banana"), -1)
+        eq(R.last_index_of("a", xs), 5)
+        eq(R.last_index_of("x", xs), -1)
+
+    def it_is_curried():
+        xs = ["a", 1, "a"]
+        curried = R.last_index_of("a")
+        eq(curried(xs), 2)
+
+    def it_finds_function_compared_by_identity():
+        f = lambda *_: None
+        g = lambda *_: None
+        xs = [g, f, g, f]
+        eq(R.last_index_of(f, xs), 3)
+
+    def it_does_not_find_function_compared_by_identity():
+        f = lambda *_: None
+        g = lambda *_: None
+        h = lambda *_: None
+        xs = [g, f]
+        eq(R.last_index_of(h, xs), -1)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

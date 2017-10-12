@@ -20,6 +20,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
+           "last_index_of",
            "nth", "head"]
 
 
@@ -314,5 +315,15 @@ def nth(offset, xs):
 
 
 last = nth(-1)
+
+
+@_curry2
+@_check_for_method("last_index_of")
+def last_index_of(target, xs):
+    for idx, item in enumerate(reversed(xs)):
+        if _equals(item, target):
+            return len(xs) - 1 - idx
+    return -1
+
 
 head = nth(0)
