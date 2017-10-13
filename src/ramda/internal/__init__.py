@@ -77,6 +77,7 @@ def _is_placeholder(x):
 
 
 def _curry1(fn):
+    @functools.wraps(fn)
     def f1(*args):
         if len(args) == 0:
             return f1
@@ -87,6 +88,7 @@ def _curry1(fn):
 
 
 def _curry2(fn):
+    @functools.wraps(fn)
     def f2(*args):
         n_args = len(args)
         if n_args == 0:
@@ -104,6 +106,7 @@ def _curry2(fn):
 
 
 def _curry3(fn):
+    @functools.wraps(fn)
     def f3(*args):
         n_args = len(args)
         if n_args == 0:
@@ -173,6 +176,7 @@ def _arity(n, fn):
 
 
 def _curry_n(length, received, fn):
+    @functools.wraps(fn)
     def _fn(*args):
         combined = []
         args_list = list(args)
