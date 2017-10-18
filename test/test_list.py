@@ -1497,13 +1497,53 @@ def describe_map_accum():
     def it_is_curried(add):
         add_or_concat = R.map_accum(add)
         sum = add_or_concat(0)
-        cat = add_or_concat('')
+        cat = add_or_concat("")
         eq(sum([1, 2, 3, 4]), [10, [1, 3, 6, 10]])
-        eq(cat(['1', '2', '3', '4']), ['1234', ['1', '12', '123', '1234']])
+        eq(cat(["1", "2", "3", "4"]), ["1234", ["1", "12", "123", "1234"]])
 
     def it_correctly_reports_the_arity_of_curried_versions(add):
         sum = R.map_accum(add, 0)
         eq(get_arity(sum), 1)
+
+
+def describe_map_accum_right():
+    @pytest.fixture
+    def add():
+        return lambda a, b: [a + b, a + b]
+
+    @pytest.fixture
+    def mult():
+        return lambda a, b: [a * b, a * b]
+
+    def it_map_and_accumulate_simple_functions_over_arrays_with_the_supplied_accumulator(
+            add, mult):
+        eq(R.map_accum_right(add, 0, [1, 2, 3, 4]), [[10, 9, 7, 4], 10])
+        eq(R.map_accum_right(mult, 1, [1, 2, 3, 4]), [[24, 24, 12, 4], 24])
+
+    def it_returns_the_list_and_accumulator_for_an_empty_array(add, mult):
+        eq(R.map_accum_right(add, 0, []), [[], 0])
+        eq(R.map_accum_right(mult, 1, []), [[], 1])
+        eq(R.map_accum_right(add, [], []), [[], []])
+
+    def it_is_curried(add):
+        add_or_concat = R.map_accum_right(add)
+        sum = add_or_concat(0)
+        cat = add_or_concat('')
+        eq(sum([1, 2, 3, 4]), [[10, 9, 7, 4], 10])
+        eq(cat(['1', '2', '3', '4']), [['1234', '234', '34', '4'], '1234'])
+
+    def it_correctly_reports_the_arity_of_curried_versions(add):
+        sum = R.map_accum_right(add, 0)
+        eq(get_arity(sum), 1)
+
+
+def describe_merge_all():
+    def it_merges_a_list_of_objects_together_into_one_object():
+        eq(R.merge_all([{"foo": 1}, {"bar": 2}, {"baz": 3}]),
+           {"foo": 1, "bar": 2, "baz": 3})
+
+    def it_gives_precedence_to_later_objects_in_the_list():
+        eq(R.merge_all([{"foo": 1}, {"foo": 2}, {"bar": 2}]), {"foo": 2, "bar": 2})
 
 
 def describe_nth():

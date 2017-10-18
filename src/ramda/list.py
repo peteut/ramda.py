@@ -20,7 +20,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
-           "last_index_of", "length", "map_accum",
+           "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
            "nth", "head"]
 
 
@@ -343,6 +343,22 @@ def map_accum(fn, acc, xs):
         tuple_ = fn(tuple_[0], item)
         result.append(tuple_[1])
     return [tuple_[0], result]
+
+
+@_curry3
+def map_accum_right(fn, acc, xs):
+    result = []
+    tuple_ = [acc]
+    for item in reversed(xs):
+        tuple_ = fn(item, tuple_[0])
+        result.append(tuple_[1])
+    return [list(reversed(result)), tuple_[0]]
+
+
+@_curry1
+def merge_all(xs):
+    return functools.reduce(
+        lambda acc, item: acc.update(item) or acc, xs, {})
 
 
 head = nth(0)
