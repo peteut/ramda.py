@@ -1474,6 +1474,38 @@ def describe_length():
         eq(R.equals(float("nan"), R.length(types.SimpleNamespace())), True)
 
 
+def describe_map_accum():
+    @pytest.fixture
+    def add():
+        return lambda a, b: [a + b, a + b]
+
+    @pytest.fixture
+    def mult():
+        return lambda a, b: [a * b, a * b]
+
+    def it_map_and_accumulate_simple_functons_overLarrays_with_the_supplied_accumulator(
+            add, mult):
+        eq(R.map_accum(add, 0, [1, 2, 3, 4]), [10, [1, 3, 6, 10]])
+        eq(R.map_accum(mult, 1, [1, 2, 3, 4]), [24, [1, 2, 6, 24]])
+
+    def it_returns_the_list_and_accumulator_for_an_empty_array(
+            add, mult):
+        eq(R.map_accum(add, 0, []), [0, []])
+        eq(R.map_accum(mult, 1, []), [1, []])
+        eq(R.map_accum(add, [], []), [[], []])
+
+    def it_is_curried(add):
+        add_or_concat = R.map_accum(add)
+        sum = add_or_concat(0)
+        cat = add_or_concat('')
+        eq(sum([1, 2, 3, 4]), [10, [1, 3, 6, 10]])
+        eq(cat(['1', '2', '3', '4']), ['1234', ['1', '12', '123', '1234']])
+
+    def it_correctly_reports_the_arity_of_curried_versions(add):
+        sum = R.map_accum(add, 0)
+        eq(get_arity(sum), 1)
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

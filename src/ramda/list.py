@@ -20,7 +20,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "drop_while", "ends_with", "find", "find_index", "find_last", "find_last_index",
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
-           "last_index_of", "length",
+           "last_index_of", "length", "map_accum",
            "nth", "head"]
 
 
@@ -333,6 +333,16 @@ def length(xs):
         if isinstance(xs, collections.Callable) \
         else xs.length if hasattr(xs, "length") and isinstance(xs.length, int) \
         else float("nan")
+
+
+@_curry3
+def map_accum(fn, acc, xs):
+    result = []
+    tuple_ = [acc]
+    for item in xs:
+        tuple_ = fn(tuple_[0], item)
+        result.append(tuple_[1])
+    return [tuple_[0], result]
 
 
 head = nth(0)
