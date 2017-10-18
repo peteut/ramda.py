@@ -817,3 +817,7 @@ def _xfind_last_index(pred, xf):
             return result
 
     return _XFindLastIndex(pred, xf)
+
+
+def _complement(f):
+    return lambda *args: not f(*args)

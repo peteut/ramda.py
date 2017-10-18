@@ -10,7 +10,7 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
     _xdrop_repeats_with, _equals, _xdrop_while, _xfind, _xfind_index, _xfind_last, \
-    _xfind_last_index, _index_of
+    _xfind_last_index, _index_of, _complement
 from .function import curry_n, invoker
 
 
@@ -21,6 +21,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
+           "none",
            "nth", "head"]
 
 
@@ -359,6 +360,9 @@ def map_accum_right(fn, acc, xs):
 def merge_all(xs):
     return functools.reduce(
         lambda acc, item: acc.update(item) or acc, xs, {})
+
+
+none = _curry2(_complement(any))
 
 
 head = nth(0)

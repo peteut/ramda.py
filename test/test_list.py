@@ -1528,9 +1528,9 @@ def describe_map_accum_right():
     def it_is_curried(add):
         add_or_concat = R.map_accum_right(add)
         sum = add_or_concat(0)
-        cat = add_or_concat('')
+        cat = add_or_concat("")
         eq(sum([1, 2, 3, 4]), [[10, 9, 7, 4], 10])
-        eq(cat(['1', '2', '3', '4']), [['1234', '234', '34', '4'], '1234'])
+        eq(cat(["1", "2", "3", "4"]), [["1234", "234", "34", "4"], "1234"])
 
     def it_correctly_reports_the_arity_of_curried_versions(add):
         sum = R.map_accum_right(add, 0)
@@ -1544,6 +1544,27 @@ def describe_merge_all():
 
     def it_gives_precedence_to_later_objects_in_the_list():
         eq(R.merge_all([{"foo": 1}, {"foo": 2}, {"bar": 2}]), {"foo": 2, "bar": 2})
+
+
+def describe_none():
+    def it_returns_true_if_no_elements_satisfy_the_predicate(even):
+        eq(R.none(even, [1, 3, 5, 7, 9, 11]), True)
+
+    def it_returns_false_if_any_element_satisfies_the_predicate(even):
+        eq(R.none(even, [1, 3, 5, 7, 8, 11]), False)
+
+    def it_returns_true_for_an_empty_list(T):
+        eq(R.none(T, []), True)
+
+    def it_works_with_more_complex_objects():
+        xs = [{"x": "abcd"}, {"x": "adef"}, {"x": "fghiajk"}]
+        len3 = lambda o: len(o["x"]) == 3
+        has_a = lambda o: o["x"].index("a") >= 0
+        eq(R.none(len3, xs), True)
+        eq(R.none(has_a, xs), False)
+
+    def it_is_curried(even):
+        eq(R.none(even)([1, 3, 5, 6, 7, 9]), False)
 
 
 def describe_nth():
