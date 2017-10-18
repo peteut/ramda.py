@@ -1567,6 +1567,12 @@ def describe_none():
         eq(R.none(even)([1, 3, 5, 6, 7, 9]), False)
 
 
+def describe_pair():
+    def it_creates_a_two_element_array():
+        eq(R.pair("foo", "bar"), ["foo", "bar"])
+        eq(R.pair("foo")("bar"), ["foo", "bar"])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
