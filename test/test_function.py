@@ -45,6 +45,47 @@ def describe_add_index():
         eq(map_indexed(lambda x: x * 2, [1, 2, 3, 4]), [2, 4, 6, 8])
 
 
+def describe_converge():
+    @pytest.fixture
+    def mult():
+        return lambda a, b: a * b
+
+    @pytest.fixture
+    def f1(mult):
+        return R.converge(mult, [lambda a: a,
+                                 lambda a: a])
+
+    @pytest.fixture
+    def f2(mult):
+        return R.converge(mult,
+                          [lambda a: a,
+                           lambda a, b: b])
+
+    @pytest.fixture
+    def f3(mult):
+        return R.converge(mult,
+                          [lambda a: a,
+                           lambda a, b, c: c])
+
+    def it_passes_the_results_of_applying_the_arguments_individually_to_two_separate_functions_into_a_single_one(mult):  # noqa
+        # mult(add1(2), add3(2)) = mult(3, 5) = 3 * 15
+        eq(R.converge(mult, [R.add(1), R.add(3)])(2), 15)
+
+    def it_returns_a_function_with_the_length_of_the_longest_argument(f1, f2, f3):
+        eq(get_arity(f1), 1)
+        eq(get_arity(f2), 2)
+        eq(get_arity(f3), 3)
+
+    def it_returns_a_curried_function(f2, f3):
+        eq(f2(6)(7), 42)
+        eq(get_arity(f3(R.__)), 3)
+
+    def it_works_with_empty_functions_list():
+        fn = R.converge(lambda: 0, [])
+        eq(get_arity(fn), 0)
+        eq(fn(), 0)
+
+
 def describe_pipe():
     def it_is_a_variadic_function():
         eq(inspect.isfunction(R.pipe), True)
