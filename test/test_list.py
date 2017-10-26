@@ -65,7 +65,7 @@ def x_gt100():
     def _pred(o):
         try:
             return o["x"] > 100
-        except:
+        except Exception:
             pass
     return _pred
 
