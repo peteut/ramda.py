@@ -1573,6 +1573,48 @@ def describe_pair():
         eq(R.pair("foo")("bar"), ["foo", "bar"])
 
 
+def describe_juxt():
+    @pytest.fixture
+    def hello():
+        return lambda: "hello"
+
+    @pytest.fixture
+    def bye():
+        return lambda: "bye"
+
+    def it_works_with_no_functions_and_no_values():
+        eq(R.juxt([])(), [])
+
+    @pytest.mark.skip()
+    def it_works_with_no_functions_and_some_values():
+        eq(R.juxt([])(2, 3), [])
+
+    def it_works_with_1_function_and_no_values(hello):
+        eq(R.juxt([hello])(), ["hello"])
+
+    def it_works_with_1_function_and_1_value():
+        eq(R.juxt([R.add(3)])(2), [5])
+
+    def it_works_with_1_function_and_some_values():
+        eq(R.juxt([R.multiply])(2, 3), [6])
+
+    def it_works_with_some_functions_and_no_values(hello, bye):
+        eq(R.juxt([hello, bye])(), ["hello", "bye"])
+
+    def it_works_with_some_functions_and_1_value():
+        eq(R.juxt([R.multiply(2), R.add(3)])(2), [4, 5])
+
+    def it_works_with_some_functions_and_some_values():
+        eq(R.juxt([R.add, R.multiply])(2, 3), [5, 6])
+
+    def it_retains_the_highest_arity(T):
+        f = R.juxt([R.n_ary(1, T), R.n_ary(3, T), R.n_ary(2, T)])
+        eq(get_arity(f), 3)
+
+    def it_returns_a_curried_function():
+        eq(R.juxt([R.multiply, R.add])(2)(3), [6, 5])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():
