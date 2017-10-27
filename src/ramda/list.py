@@ -10,7 +10,7 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
     _xdrop_repeats_with, _equals, _xdrop_while, _xfind, _xfind_index, _xfind_last, \
-    _xfind_last_index, _index_of, _complement
+    _xfind_last_index, _index_of, _complement, _is_number
 from .function import curry_n, invoker, converge
 
 
@@ -21,7 +21,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
-           "none", "pair", "juxt",
+           "none", "pair", "juxt", "range",
            "nth", "head"]
 
 
@@ -373,6 +373,13 @@ def pair(fst, snd):
 @_curry1
 def juxt(fns):
     return converge(lambda *args: list(args), fns)
+
+
+@_curry2
+def range(from_, to):
+    if not _is_number(from_) and _is_number(to):
+        raise TypeError("Both arguments to range must be numbers")
+    return builtins.range(from_, to)
 
 
 head = nth(0)

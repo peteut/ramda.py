@@ -3,6 +3,7 @@ import types
 import functools
 import builtins
 import math
+import fastnumbers
 
 
 class _Placeholder():
@@ -821,3 +822,6 @@ def _xfind_last_index(pred, xf):
 
 def _complement(f):
     return lambda *args: not f(*args)
+
+
+_is_number = functools.partial(fastnumbers.isint, num_only=True)

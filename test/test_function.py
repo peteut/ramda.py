@@ -36,7 +36,7 @@ def describe_add_index():
     def map_indexed():
         return R.add_index(R.map)
 
-    def describe_unary_functions_like_map():
+    def describe_un_ary_functions_like_map():
         # def times2(x) = lambda x: x * 2
         # add_index_param = lambda x, idx: x + idx
         pass
@@ -165,3 +165,31 @@ def describe_invoker():
     def it_curries_the_method_call(add2):
         eq(add2()([3, 4])([1, 2]), [1, 2, 3, 4])
         eq(add2([3, 4])([1, 2]), [1, 2, 3, 4])
+
+
+def test_n_ary():
+    @pytest.fixture
+    def to_array():
+        return lambda *args: list(args)
+
+    def it_turns_multiple_argument_function_into_a_nullary_one(to_array):
+        fn = R.n_ary(0, to_array)
+        eq(get_arity(fn), 0)
+        eq(fn(1, 2, 3), [])
+
+    def it_turns_multiple_argument_function_into_a_ternary_one(to_array):
+        fn = R.n_ary(3, to_array)
+        eq(get_arity(fn), 3)
+        eq(fn(1, 2, 3, 4), [1, 2, 3])
+        eq(fn(1), [1, None, None])
+
+    def it_creates_functions_of_arity_less_than_or_equal_to_ten(to_array):
+        fn = R.n_ary(10, to_array)
+        eq(get_arity(fn), 10)
+        eq(fn(*R.range(0, 10)), R.range(0, 10))
+
+    def it_throws_if_n_is_greater_than_ten():
+        with pytest.raises(ValueError,
+                           message="First argument to n_ary must be a non-negative "
+                           "integer no greater than ten"):
+            R.n_ary(11, lambda: None)
