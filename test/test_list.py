@@ -1615,6 +1615,45 @@ def describe_juxt():
         eq(R.juxt([R.multiply, R.add])(2)(3), [6, 5])
 
 
+def describe_reject():
+    def it_reduces_an_array_to_those_not_matching_a_filter(even):
+        eq(R.reject(even, [1, 2, 3, 4, 5]), [1, 3, 5])
+
+    def it_returns_an_empty_array_if_no_element_matches():
+        eq(R.reject(lambda x: x < 100, [1, 9, 99]), [])
+
+    def it_returns_an_empty_array_if_asked_to_filter_an_empty_array():
+        eq(R.reject(lambda x: x > 100, []), [])
+
+    def it_filters_objects():
+        eq(R.reject(R.equals(0), {}), {})
+        eq(R.reject(R.equals(0), {"x": 0, "y": 0, "z": 0}), {})
+        eq(R.reject(R.equals(0), {"x": 1, "y": 0, "z": 0}), {"x": 1})
+        eq(R.reject(R.equals(0), {"x": 1, "y": 2, "z": 0}), {"x": 1, "y": 2})
+        eq(R.reject(R.equals(0), {"x": 1, "y": 2, "z": 3}), {"x": 1, "y": 2, "z": 3})
+
+    def it_dispatches_to_filter_method(just, T, F):
+        class Nothing():
+            def filter(self, _):
+                return self
+
+        Nothing.value = Nothing()
+
+        class Just(just):
+            def filter(self, pred):
+                return self if pred(self.value) else Nothing.value
+
+        m = Just(42)
+        eq(R.filter(T, m), m)
+        eq(R.filter(F, m), Nothing.value)
+        eq(R.reject(T, m), Nothing.value)
+        eq(R.reject(F, m), m)
+
+    def it_is_curried(even):
+        odd = R.reject(even)
+        eq(odd([1, 2, 3, 4, 5, 6, 7]), [1, 3, 5, 7])
+
+
 def describe_nth():
     @pytest.fixture
     def xs():

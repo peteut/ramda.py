@@ -21,7 +21,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
-           "none", "pair", "juxt", "range",
+           "none", "pair", "juxt", "range", "reject",
            "nth", "head"]
 
 
@@ -373,6 +373,11 @@ def pair(fst, snd):
 @_curry1
 def juxt(fns):
     return converge(lambda *args: list(args), fns)
+
+
+@_curry2
+def reject(pred, filterable):
+    return filter(_complement(pred), filterable)
 
 
 @_curry2
