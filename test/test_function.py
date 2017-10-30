@@ -86,6 +86,51 @@ def describe_converge():
         eq(fn(), 0)
 
 
+@pytest.fixture
+def just():
+    class Just:
+        def __init__(self, x):
+            self.value = x
+    return Just
+
+
+def describe_empty():
+    def it_dispatches_to_empty_method(just):
+        class Nothing:
+            pass
+        Nothing.empty = staticmethod(lambda: Nothing())
+
+        class Just(just):
+            @staticmethod
+            def empty():
+                return Nothing()
+
+        eq(isinstance(R.empty(Nothing()), Nothing), True)
+        eq(isinstance(R.empty(Just(123)), Nothing), True)
+
+    def it_dispatches_to_empty_function_on_constructor(just):
+        class Nothing:
+            pass
+        Nothing.empty = staticmethod(lambda: Nothing())
+
+        class Just(just):
+            @staticmethod
+            def empty():
+                return Nothing()
+
+        eq(isinstance(R.empty(Nothing()), Nothing), True)
+        eq(isinstance(R.empty(Just(123)), Nothing), True)
+
+    def it_returns_empty_array_given_array():
+        eq(R.empty([1, 2, 3]), [])
+
+    def it_returns_empty_object_given_object():
+        eq(R.empty({"x": 1, "y": 2}), {})
+
+    def it_returns_empty_string_given_string():
+        eq(R.empty("abc"), "")
+
+
 def describe_pipe():
     def it_is_a_variadic_function():
         eq(inspect.isfunction(R.pipe), True)
@@ -120,7 +165,7 @@ def describe_compose():
 
         eq(get_arity(f), 2)
         eq(f("10", 10)([1, 2, 3]), [10, 20, 30])
-        eq(f('10', 2)([1, 2, 3]), [2, 4, 6])
+        eq(f("10", 2)([1, 2, 3]), [2, 4, 6])
 
     def it_throws_if_given_no_arguments():
         with pytest.raises(ValueError,

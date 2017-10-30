@@ -829,3 +829,11 @@ _is_number = functools.partial(fastnumbers.isint, num_only=True)
 
 def _is_object(x):
     return isinstance(x, collections.Mapping)
+
+
+def _is_array(x):
+    return isinstance(x, collections.Sequence) and not isinstance(x, str)
+
+
+def _is_string(x):
+    return isinstance(x, str)

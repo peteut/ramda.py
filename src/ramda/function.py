@@ -2,10 +2,10 @@ import inspect
 import collections
 import builtins
 from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
-    _pipe, _reduce
+    _pipe, _reduce, _is_array, _is_string, _is_object
 
 
-__all__ = ["always", "curry_n", "converge", "identity", "always", "pipe", "compose",
+__all__ = ["always", "curry_n", "converge", "empty", "identity", "always", "pipe", "compose",
            "invoker", "n_ary"]
 
 
@@ -34,6 +34,20 @@ def converge(after, fns):
     def fn(*args):
         return after(*[call_fn(fn, args) for fn in fns])
     return fn
+
+
+@_curry1
+def empty(x):
+    if isinstance(getattr(x, "empty", None), collections.Callable):
+        return x.empty()
+    elif isinstance(x, collections.Callable):
+        return lambda _: None
+    elif _is_array(x):
+        return []
+    elif _is_string(x):
+        return ""
+    elif _is_object(x):
+        return {}
 
 
 identity = _curry1(_identity)
