@@ -1,3 +1,4 @@
+pbr
 flake8
 pytest==3.5
 pytest-flake8
