@@ -364,6 +364,7 @@ def _identity(x):
 
 @_curry3
 def _dispatchable(method_names, xf, fn):
+    @functools.wraps(fn)
     def _fn(*args):
         if len(args) == 0:
             return fn()
@@ -410,6 +411,7 @@ def _step_cat(obj):
 
 @_curry2
 def _check_for_method(method_name, fn):
+    @functools.wraps(fn)
     def _fn(*args):
         if len(args) == 0:
             return fn()

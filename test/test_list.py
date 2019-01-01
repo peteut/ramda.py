@@ -340,10 +340,6 @@ def describe_map():
 
 
 def describe_filter():
-    @pytest.fixture
-    def even():
-        return lambda n: n % 2 == 0
-
     def it_reduces_an_array_to_those_matching_a_filter(even):
         eq(R.filter(even, [1, 2, 3, 4, 5]), [2, 4])
 
@@ -771,7 +767,7 @@ def describe_drop_repeats_with():
 
     @pytest.fixture
     def eq_i():
-        return lambda x, y: x["i"] == y["i"]  # FIXME: R.eqProps("i")
+        return R.eq_props("i")
 
     def it_removes_repeated_elements_based_on_predicate(objs, objs2, eq_i):
         eq(R.drop_repeats_with(eq_i, objs2), objs)
@@ -1652,6 +1648,53 @@ def describe_reject():
     def it_is_curried(even):
         odd = R.reject(even)
         eq(odd([1, 2, 3, 4, 5, 6, 7]), [1, 3, 5, 7])
+
+
+def describe_partition():
+    @pytest.fixture
+    def complement():
+        def _fn(f):
+            return lambda *args: not f(*args)
+        return _fn
+
+    @pytest.fixture
+    def is_empty():
+        return lambda arg: isinstance(arg, collections.Iterable) and len(arg) == 0
+
+    def it_splits_a_list_into_two_lists_according_to_a_predicate(even):
+        eq(R.partition(even, []), [[], []])
+        eq(R.partition(even, [0, 2, 4, 6]), [[], [0, 2, 4, 6]])
+        eq(R.partition(even, [1, 3, 5, 7]), [[1, 3, 5, 7], []])
+        eq(R.partition(even, [0, 1, 2, 3]), [[1, 3], [0, 2]])
+
+    def it_works_with_objects(even):
+        eq(R.partition(even, {}), [{}, {}])
+        eq(R.partition(even, {"a": 0, "b": 2, "c": 4, "d": 6}),
+           [{}, {"a": 0, "b": 2, "c": 4, "d": 6}])
+        eq(R.partition(even, {"a": 1, "b": 3, "c": 5, "d": 7}),
+           [{"a": 1, "b": 3, "c": 5, "d": 7}, {}])
+        eq(R.partition(even, {"a": 0, "b": 1, "c": 2, "d": 3}),
+           [{"b": 1, "d": 3}, {"a": 0, "c": 2}])
+
+    def itworks_with_other_filterables(just, complement):
+        class Nothing():
+            def filter(self, _):
+                return self
+
+        Nothing.value = Nothing()
+
+        class Just(just):
+            def filter(self, pred):
+                return self if pred(self.value) else Nothing.value
+
+        eq(R.partition(R.is_empty, Just(3)),
+           [Nothing(), Just(3)])
+        eq(R.partition(complement(R.is_empty), Just(3)),
+           [Just(3), Nothing()])
+
+    def it_is_curried():
+        polarize = R.partition(bool)
+        eq(polarize([True, 0, 1, None]), [[True, 1], [0, None]])
 
 
 def describe_nth():

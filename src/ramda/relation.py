@@ -1,7 +1,7 @@
 from .internal import _curry2, _curry3, _equals, _identical
 
 
-__all__ = ["clamp", "equals", "identical"]
+__all__ = ["clamp", "equals", "eq_props", "identical", "prop_eq"]
 
 
 @_curry3
@@ -17,3 +17,13 @@ def clamp(min, max, value):
 equals = _curry2(_equals)
 
 identical = _curry2(_identical)
+
+
+@_curry3
+def prop_eq(name, val, obj):
+    return _equals(val, obj[name])
+
+
+@_curry3
+def eq_props(prop, obj1, obj2):
+    return equals(obj1[prop], obj2[prop])
