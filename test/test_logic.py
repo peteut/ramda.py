@@ -4,6 +4,41 @@ from .common import get_arity
 import pytest
 
 
+def any_pass():
+    @pytest.fixture
+    def odd():
+        return lambda n: n % 2 != 0
+
+    @pytest.fixture
+    def gt20():
+        return lambda n: n > 20
+
+    @pytest.fixture
+    def lt5():
+        return lambda n: n < 5
+
+    @pytest.fixture
+    def plus_eq():
+        return lambda w, x, y, z: w + x == y + z
+
+    def it_report_wheter_any_preds_are_satisfied(odd, gt20, lt5):
+        ok = R.any_pass([odd, gt20, lt5])
+        eq(ok(7), True)
+        eq(ok(9), True)
+        eq(ok(10), False)
+        eq(ok(18), False)
+        eq(ok(3), True)
+        eq(ok(22), True)
+
+    def it_returns_false_for_an_empty_pred_list():
+        eq(R.any_pass([])(3), False)
+
+    def it_returns_a_curried_function_whose_arity_matches(odd, lt5, plus_eq):
+        eq(get_arity(R.any_pass([odd, lt5, plus_eq])), 4)
+        eq(R.any_pass([odd, lt5, plus_eq])(6, 7, 8, 9), False)
+        eq(R.any_pass([odd, lt5, plus_eq])(6)(7)(8)(9), False)
+
+
 def if_else():
     @pytest.fixture
     def t():
@@ -115,7 +150,6 @@ def describe_not_():
 
 
 def describe_is_empty():
-
     def it_returnns_false_for_none():
         eq(R.is_empty(None), False)
 
@@ -129,3 +163,16 @@ def describe_is_empty():
     def it_returns_true_for_empty_dict():
         eq(R.is_empty({}), True)
         eq(R.is_empty({"a": 1}), False)
+
+
+def describe_when():
+    def it_calls_the_when_true_fn_if_pred_returns_a_truthy_value():
+        eq(R.when(R.is_(int), R.add(1))(10), 11)
+
+    def it_returns_the_arg_if_pred_returns_a_falsy_value():
+        eq(R.when(R.is_(int), R.add(1))("hello"), "hello")
+
+    def it_return_a_curried_function():
+        if_is_number = R.when(R.is_(int))
+        eq(if_is_number(R.add(1))(15), 16)
+        eq(if_is_number(R.add(1))("hello"), "hello")
