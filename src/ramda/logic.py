@@ -1,8 +1,23 @@
-from .internal import _curry1
+from .internal import _curry1, _curry2
 from .function import empty
 from .relation import equals
 
-__all__ = ["is_empty"]
+__all__ = ["and_", "or_", "not_", "is_empty"]
+
+
+@_curry2
+def and_(a, b):
+    return a and b
+
+
+@_curry2
+def or_(a, b):
+    return a or b
+
+
+@_curry1
+def not_(a):
+    return not a
 
 
 @_curry1
