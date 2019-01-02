@@ -1,7 +1,7 @@
 from .internal import _curry2, _curry3, _equals, _identical
 
 
-__all__ = ["clamp", "equals", "eq_props", "identical", "prop_eq"]
+__all__ = ["clamp", "equals", "eq_props", "identical", "prop_eq", "gt"]
 
 
 @_curry3
@@ -27,3 +27,8 @@ def prop_eq(name, val, obj):
 @_curry3
 def eq_props(prop, obj1, obj2):
     return equals(obj1[prop], obj2[prop])
+
+
+@_curry2
+def gt(a, b):
+    return a > b
