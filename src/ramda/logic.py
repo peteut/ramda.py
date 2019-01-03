@@ -1,6 +1,6 @@
 from .internal import _curry1, _curry2, _curry3, _curry_n, _arity
 from .function import empty
-from .relation import equals
+from .internal import _equals
 
 __all__ = ["any_pass", "and_", "or_", "not_", "is_empty", "when"]
 
@@ -35,7 +35,7 @@ def not_(a):
 
 @_curry1
 def is_empty(x):
-    return x is not None and equals(x, empty(x))
+    return x is not None and _equals(x, empty(x))
 
 
 @_curry3

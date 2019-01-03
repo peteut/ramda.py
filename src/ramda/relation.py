@@ -26,7 +26,7 @@ def prop_eq(name, val, obj):
 
 @_curry3
 def eq_props(prop, obj1, obj2):
-    return equals(obj1[prop], obj2[prop])
+    return _equals(obj1[prop], obj2[prop])
 
 
 @_curry2
