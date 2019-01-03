@@ -25,3 +25,12 @@ def describe_is_nil():
         eq(R.is_nil({}), False)
         eq(R.is_nil(0), False)
         eq(R.is_nil(""), False)
+
+
+def describe_prop_is():
+    def it_returns_true_if_the_obj_property_is_of_the_given_type():
+        eq(R.prop_is(int, "value", {"value": 1}), True)
+
+    def it_returns_false_otherwise():
+        eq(R.prop_is(str, "value", {"value": 1}), False)
+        eq(R.prop_is(str, "value", {}), False)
