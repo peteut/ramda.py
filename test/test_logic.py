@@ -4,23 +4,45 @@ from .common import get_arity
 import pytest
 
 
+@pytest.fixture
+def odd():
+    return lambda n: n % 2 != 0
+
+
+@pytest.fixture
+def gt20():
+    return lambda n: n > 20
+
+
+@pytest.fixture
+def lt5():
+    return lambda n: n < 5
+
+
+@pytest.fixture
+def plus_eq():
+    return lambda w, x, y, z: w + x == y + z
+
+
+def all_pass():
+    def it_reports_wheter_all_preds_are_satified(odd, lt20, gt5):
+        ok = R.all_pass([odd, lt20, gt5])
+        eq(ok(7), True)
+        eq(ok(9), True)
+        eq(ok(10), False)
+        eq(ok(3), False)
+        eq(ok(21), False)
+
+    def it_returns_true_on_empty_predicate_list():
+        eq(R.all_pass([])(3), True)
+
+    def it_returns_a_curried_function_whose_arity_matches(odd, gt5, plus_eq):
+        eq(get_arity(R.all_pass([odd, gt5, plus_eq])), 4)
+        eq(R.all_pass([odd, gt5, plus_eq])(9, 9, 9, 9), True)
+        eq(R.all_pass([odd, gt5, plus_eq])(9)(9)(9)(9), True)
+
+
 def any_pass():
-    @pytest.fixture
-    def odd():
-        return lambda n: n % 2 != 0
-
-    @pytest.fixture
-    def gt20():
-        return lambda n: n > 20
-
-    @pytest.fixture
-    def lt5():
-        return lambda n: n < 5
-
-    @pytest.fixture
-    def plus_eq():
-        return lambda w, x, y, z: w + x == y + z
-
     def it_report_wheter_any_preds_are_satisfied(odd, gt20, lt5):
         ok = R.any_pass([odd, gt20, lt5])
         eq(ok(7), True)
