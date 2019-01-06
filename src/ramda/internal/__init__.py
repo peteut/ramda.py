@@ -32,9 +32,11 @@ def _identical(a, b):
 
 
 def _has(prop, obj):
+    if isinstance(obj, collections.Mapping):
+        return prop in obj
     try:
-        return prop in obj if isinstance(obj, collections.Mapping) else \
-            obj[prop] and True
+        obj[prop]
+        return True
     except IndexError:
         return False
 
