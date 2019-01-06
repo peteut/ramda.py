@@ -233,6 +233,14 @@ def describe_is_empty():
         eq(R.is_empty({"a": 1}), False)
 
 
+def describe_until():
+    def it_applies_fn_until_pred_is_satisfied():
+        eq(R.until(R.gt(R.__, 100), R.multiply(2), 1), 128)
+
+    def it_ignores_fn_if_predicate_is_always_true():
+        eq(R.until(lambda _: True, lambda _: True, False), False)
+
+
 def describe_when():
     def it_calls_the_when_true_fn_if_pred_returns_a_truthy_value():
         eq(R.when(R.is_(int), R.add(1))(10), 11)

@@ -3,7 +3,7 @@ from .function import empty, _get_arity
 from .internal import _equals
 
 __all__ = ["all_pass", "any_pass", "cond", "and_", "or_", "not_",
-           "is_empty", "when"]
+           "is_empty", "until", "when"]
 
 
 @_curry1
@@ -55,6 +55,14 @@ def not_(a):
 @_curry1
 def is_empty(x):
     return x is not None and _equals(x, empty(x))
+
+
+@_curry3
+def until(pred, fn, init):
+    val = init
+    while not pred(val):
+        val = fn(val)
+    return val
 
 
 @_curry3
