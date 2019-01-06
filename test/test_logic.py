@@ -1,3 +1,4 @@
+import collections
 import ramda as R
 from ramda.shared import eq
 from .common import get_arity
@@ -134,6 +135,51 @@ def if_else():
         eq(fn(2, 7), 9)
         eq(fn(7)(2), 5)
         eq(fn(7, 2), 5)
+
+
+def describe_cond():
+    def it_returns_a_function():
+        eq(isinstance(R.cond([]), collections.Callable), True)
+
+    def it_returns_a_conditional_function():
+        fn = R.cond([
+            [R.equals(0), R.always("water freezes at 0°C")],
+            [R.equals(100), R.always("water boils at 100°C")],
+            [lambda _: True,
+             lambda temp: "nothing special happens at {}'°C".format(temp)]
+        ])
+        eq(fn(0), "water freezes at 0°C")
+        eq(fn(50), "nothing special happens at 50°C")
+        eq(fn(100), "water boils at 100°C")
+
+    def it_returns_a_function_which_returns_none_if_none_of_the_preds_matches():
+        fn = R.cond([
+            [R.equals("foo"), R.always(1)],
+            [R.equals("bar"), R.always(2)]
+        ])
+        eq(fn("quux"), None)
+
+    def it_predicates_are_tested_order():
+        fn = R.cond([
+            [lambda _: True, R.always("foo")],
+            [lambda _: True, R.always("bar")],
+            [lambda _: True, R.always("baz")]
+        ])
+        eq(fn(), "foo")
+
+    def it_forwards_all_args_to_preds_and_to_transformers():
+        fn = R.cond([
+            [lambda _, x: x == 42, lambda *args: len(args)]
+        ])
+        eq(fn(21, 42), 2)
+
+    def it_retains_highest_predicate_arity():
+        fn = R.cond([
+            [R.n_ary(2, lambda *_: True), lambda _: True],
+            [R.n_ary(3, lambda *_: True), lambda _: True],
+            [R.n_ary(1, lambda *_: True), lambda _: True]
+        ])
+        eq(get_arity(fn), 3)
 
 
 def describe_and_():
