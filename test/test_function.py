@@ -1,8 +1,42 @@
 import inspect
+import types
+import collections
 import pytest
 import ramda as R
 from ramda.shared import eq
 from .common import get_arity
+
+
+def describe_ap():
+    @pytest.fixture
+    def mult2():
+        return lambda x: x * 2
+
+    @pytest.fixture
+    def plus3():
+        return lambda x: x + 3
+
+    def it_interprets_a_as_an_applicative(mult2, plus3):
+        eq(R.ap([mult2, plus3], [1, 2, 3]), [2, 4, 6, 4, 5, 6])
+
+    def it_interprets_function_as_an_applicative():
+        def f(r):
+            return lambda a: r + a
+
+        def g(r):
+            return r * 2
+
+        h = R.ap(f, g)
+        eq(h(10), 10 + (10 * 2))
+        eq(R.ap(R.add)(g)(10), 10 + (10 * 2))
+
+    def it_displatches_to_the_passed_objects_ap_method():
+        obj = types.SimpleNamespace(ap="called ap with {}".format)
+        eq(R.ap(obj, 10), obj.ap(10))
+
+    def it_is_curried(mult2, plus3):
+        val = R.ap([mult2, plus3])
+        eq(isinstance(val, collections.Callable), True)
 
 
 def describe_curry_n():

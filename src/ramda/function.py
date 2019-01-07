@@ -2,11 +2,12 @@ import inspect
 import collections
 import builtins
 from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
-    _pipe, _reduce, _is_array, _is_string, _is_object
+    _pipe, _reduce, _is_array, _is_string, _is_object, _concat, _xmap, \
+    _dispatchable
 
 
-__all__ = ["always", "curry_n", "converge", "empty", "identity", "always", "pipe", "compose",
-           "invoker", "n_ary"]
+__all__ = ["ap", "always", "curry_n", "converge", "empty", "identity", "always",
+           "pipe", "compose", "invoker", "n_ary"]
 
 
 def _get_arity(fn):
@@ -16,6 +17,20 @@ def _get_arity(fn):
 @_curry1
 def always(val):
     return lambda *_: val
+
+
+@_curry2
+def ap(apply_f, apply_x):
+    from .list import map
+
+    if isinstance(getattr(apply_f, "ap", None), collections.Callable):
+        return apply_f.ap(apply_x)
+    if isinstance(apply_f, collections.Callable):
+        return lambda x: apply_f(x)(apply_x(x))
+
+    print(apply_f, apply_x)
+    return _reduce(
+        lambda acc, f: _concat(acc, map(f, apply_x)), [], apply_f)
 
 
 @_curry2
