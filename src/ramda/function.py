@@ -7,7 +7,7 @@ from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
 
 
 __all__ = ["ap", "always", "curry_n", "converge", "empty", "identity", "always",
-           "pipe", "compose", "invoker", "n_ary"]
+           "pipe", "compose", "invoker", "n_ary", "lift_n"]
 
 
 def _get_arity(fn):
@@ -130,3 +130,14 @@ def n_ary(n, fn):
             a7=None, a8=None, a9=None: fn(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)
     raise ValueError(
         "First argument to nAry must be a non-negative integer no greater than ten")
+
+
+@_curry2
+def lift_n(arity, fn):
+    from .list import map
+
+    lifted = curry_n(arity, fn)
+    return curry_n(
+        arity,
+        lambda *args: _reduce(ap, map(lifted, args[0]), args[1:]))
+

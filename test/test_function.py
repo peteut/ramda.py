@@ -272,3 +272,59 @@ def describe_n_ary():
                            message="First argument to n_ary must be a non-negative "
                            "integer no greater than ten"):
             R.n_ary(11, lambda: None)
+
+
+def describe_lift_n():
+    @pytest.fixture
+    def add_n():
+        return lambda *args: R.reduce(lambda a, b: a + b, 0, args)
+
+    @pytest.fixture
+    def add3():
+        return lambda a, b, c: a + b + c
+
+    @pytest.fixture
+    def add_n3(add_n):
+        return R.lift_n(3, add_n)
+
+    @pytest.fixture
+    def add_n4(add_n):
+        return R.lift_n(4, add_n)
+
+    @pytest.fixture
+    def add_n5(add_n):
+        return R.lift_n(5, add_n)
+
+    def it_returna_a_function(add3):
+        eq(isinstance(R.lift_n(3, add3), collections.Callable), True)
+
+    def it_limits_a_variadic_function_to_the_specified_arity(add_n3):
+        eq(add_n3([1, 10], [2], [3]), [6, 15])
+
+    def it_can_lift_functions_of_any_arity(add_n3, add_n4, add_n5):
+        eq(add_n3([1, 10], [2], [3]), [6, 15])
+        eq(add_n4([1, 10], [2], [3], [40]), [46, 55])
+        eq(add_n5([1, 10], [2], [3], [40], [500, 1000]), [546, 1046, 555, 1055])
+
+    def it_is_curried(add_n):
+        f4 = R.lift_n(4)
+        eq(isinstance(f4, collections.Callable), True)
+        eq(f4(add_n)([1], [2], [3], [4, 5]), [10, 11])
+
+    def it_interprets_list_as_a_functor(add_n3):
+        eq(add_n3([1, 2, 3], [10, 20], [100, 200, 300]),
+           [111, 211, 311, 121, 221, 321, 112, 212, 312, 122, 222, 322,
+            113, 213, 313, 123, 223, 323])
+        eq(add_n3([1], [2], [3]), [6])
+        eq(add_n3([1, 2], [10, 20], [100, 200]), [111, 211, 121, 221, 112, 212, 122, 222])
+
+    def it_interprets_fn_as_a_functor(add_n3):
+        converged_on_int = add_n3(R.add(2), R.multiply(3), R.subtract(4))
+        converged_on_bool = R.lift_n(2, R.and_)(R.gt(R.__, 0), R.lt(R.__, 3))
+        eq(isinstance(converged_on_int, collections.Callable), True)
+        eq(isinstance(converged_on_bool, collections.Callable), True)
+        eq(converged_on_int(10), (10 + 2) + (10 * 3) + (4 - 10))
+        eq(converged_on_bool(0), (0 > 0) and (0 < 3))
+        eq(converged_on_bool(1), (1 > 0) and (1 < 3))
+        eq(converged_on_bool(2), (2 > 0) and (2 < 3))
+        eq(converged_on_bool(3), (3 > 0) and (3 < 3))

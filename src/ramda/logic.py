@@ -2,7 +2,7 @@ from .internal import _curry1, _curry2, _curry3, _curry_n, _arity
 from .function import empty, _get_arity
 from .internal import _equals
 
-__all__ = ["all_pass", "any_pass", "cond", "and_", "or_", "not_",
+__all__ = ["all_pass", "any_pass", "lt", "gt", "cond", "and_", "or_", "not_",
            "is_empty", "until", "when"]
 
 
@@ -16,6 +16,15 @@ def all_pass(preds):
 def any_pass(preds):
     return _curry_n(max(map(_get_arity, preds)),
                     lambda *args: any(map(lambda pred: pred(*args), preds)))
+
+@_curry2
+def lt(a, b):
+    return a < b
+
+
+@_curry2
+def gt(a, b):
+    return  a > b
 
 
 @_curry3
