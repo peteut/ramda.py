@@ -7,7 +7,7 @@ from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
 
 
 __all__ = ["ap", "always", "curry_n", "converge", "empty", "identity", "always",
-           "pipe", "compose", "invoker", "n_ary", "lift_n"]
+           "pipe", "compose", "invoker", "n_ary", "lift_n", "lift"]
 
 
 def _get_arity(fn):
@@ -141,3 +141,7 @@ def lift_n(arity, fn):
         arity,
         lambda *args: _reduce(ap, map(lifted, args[0]), args[1:]))
 
+
+@_curry1
+def lift(fn):
+    return lift_n(_get_arity(fn), fn)

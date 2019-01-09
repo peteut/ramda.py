@@ -328,3 +328,43 @@ def describe_lift_n():
         eq(converged_on_bool(1), (1 > 0) and (1 < 3))
         eq(converged_on_bool(2), (2 > 0) and (2 < 3))
         eq(converged_on_bool(3), (3 > 0) and (3 < 3))
+
+
+def describe_lift():
+    @pytest.fixture
+    def add3():
+        return lambda a, b, c: a + b + c
+
+    @pytest.fixture
+    def add4():
+        return lambda a, b, c, d: a + b + c + d
+
+    @pytest.fixture
+    def add5():
+        return lambda a, b, c, d, e: a + b + c + d + e
+
+    @pytest.fixture
+    def madd3(add3):
+        return R.lift(add3)
+
+    @pytest.fixture
+    def madd4(add4):
+        return R.lift(add4)
+
+    @pytest.fixture
+    def madd5(add5):
+        return R.lift(add5)
+
+    def it_returns_a_function_if_called_with_just_a_function():
+        eq(isinstance(R.lift(R.add), collections.Callable), True)
+
+    def it_produces_a_cross_product_of_list_values(madd3):
+        eq(madd3([1, 2, 3], [1, 2], [1, 2, 3]),
+           [3, 4, 5, 4, 5, 6, 4, 5, 6, 5, 6, 7, 5, 6, 7, 6, 7, 8])
+        eq(madd3([1], [2], [3]), [6])
+        eq(madd3([1, 2], [3, 4], [5, 6]), [9, 10, 10, 11, 10, 11, 11, 12])
+
+    def it_can_lift_functions_of_any_arity(madd3, madd4, madd5):
+        eq(madd3([1, 10], [2], [3]), [6, 15])
+        eq(madd4([1, 10], [2], [3], [40]), [46, 55])
+        eq(madd5([1, 10], [2], [3], [40], [500, 1000]), [546, 1046, 555, 1055])
