@@ -3,6 +3,7 @@ import types
 import functools
 import builtins
 import math
+import inspect
 import fastnumbers
 
 
@@ -21,6 +22,15 @@ def _keys(obj):
     return obj.keys() if isinstance(obj, collections.Mapping) else \
         [idx for idx in range(len(obj))] if isinstance(obj, collections.Sequence) else \
         []
+
+
+def _get_arity(fn):
+    return len(inspect.signature(fn).parameters)
+
+
+def _fix_arity(fn):
+    n = _get_arity(fn)
+    return lambda *args: fn(*args[:n])
 
 
 def _identical(a, b):

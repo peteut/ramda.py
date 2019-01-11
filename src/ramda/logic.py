@@ -1,21 +1,25 @@
-from .internal import _curry1, _curry2, _curry3, _curry_n, _arity
-from .function import empty, _get_arity
-from .internal import _equals
-
-__all__ = ["all_pass", "any_pass", "lt", "gt", "cond", "and_", "or_", "not_",
-           "is_empty", "until", "when"]
+from .internal import _curry1, _curry2, _curry3, _arity
+from .function import empty, curry_n
+from .internal import _equals, _get_arity, _fix_arity
+__all__ = ["all_pass", "any_pass", "lt", "if_else", "gt", "cond", "and_",
+           "or_", "not_", "is_empty", "until", "when"]
 
 
 @_curry1
 def all_pass(preds):
-    return _curry_n(max(map(_get_arity, preds)),
-                    lambda *args: all(map(lambda pred: pred(*args), preds)))
+    fixed_preds = [_fix_arity(p) for p in preds]
+    return curry_n(max(map(_get_arity, preds)) if len(preds) else 1,
+                   lambda *args: all(map(lambda p: p(*args), fixed_preds))
+                   if len(preds) else True)
 
 
 @_curry1
 def any_pass(preds):
-    return _curry_n(max(map(_get_arity, preds)),
-                    lambda *args: any(map(lambda pred: pred(*args), preds)))
+    fixed_preds = [_fix_arity(p) for p in preds]
+    return curry_n(max(map(_get_arity, preds)) if len(preds) else 1,
+                   lambda *args: any(map(lambda p: p(*args), fixed_preds))
+                   if len(preds) else False)
+
 
 @_curry2
 def lt(a, b):
@@ -24,15 +28,15 @@ def lt(a, b):
 
 @_curry2
 def gt(a, b):
-    return  a > b
+    return a > b
 
 
 @_curry3
 def if_else(condition, on_true, on_false):
-    return _curry_n(
+    return curry_n(
         max(map(_get_arity, [condition, on_true, on_false])),
-        lambda *args: on_true(*args) if condition(*args) else
-        on_false(*args))
+        lambda *args: _fix_arity(on_true)(*args)
+        if _fix_arity(condition)(*args) else _fix_arity(on_false)(*args))
 
 
 @_curry1

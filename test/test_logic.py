@@ -11,13 +11,13 @@ def odd():
 
 
 @pytest.fixture
-def gt20():
-    return lambda n: n > 20
+def lt20():
+    return lambda n: n < 20
 
 
 @pytest.fixture
-def lt5():
-    return lambda n: n < 5
+def gt5():
+    return lambda n: n > 5
 
 
 @pytest.fixture
@@ -25,7 +25,7 @@ def plus_eq():
     return lambda w, x, y, z: w + x == y + z
 
 
-def all_pass():
+def describe_all_pass():
     def it_reports_wheter_all_preds_are_satified(odd, lt20, gt5):
         ok = R.all_pass([odd, lt20, gt5])
         eq(ok(7), True)
@@ -43,7 +43,15 @@ def all_pass():
         eq(R.all_pass([odd, gt5, plus_eq])(9)(9)(9)(9), True)
 
 
-def any_pass():
+def describe_any_pass():
+    @pytest.fixture
+    def gt20():
+        return lambda n: n > 20
+
+    @pytest.fixture
+    def lt5():
+        return lambda n: n < 5
+
     def it_report_wheter_any_preds_are_satisfied(odd, gt20, lt5):
         ok = R.any_pass([odd, gt20, lt5])
         eq(ok(7), True)
@@ -62,7 +70,7 @@ def any_pass():
         eq(R.any_pass([odd, lt5, plus_eq])(6)(7)(8)(9), False)
 
 
-def if_else():
+def describe_if_else():
     @pytest.fixture
     def t():
         return lambda a: a + 1
@@ -80,7 +88,7 @@ def if_else():
         def v(a):
             return isinstance(a, int)
 
-        eq(R.if_else(v, t, identity), 11)
+        eq(R.if_else(v, t, identity)(10), 11)
 
     def it_calls_the_false_case_function_if_validator_returns_falsy(
             identity, t):
@@ -130,7 +138,7 @@ def if_else():
         eq(is_number(t, identity)(15), 16)
         eq(is_number(t, identity)("hello"), "hello")
 
-        fn = R.if_else(R.gt, R.substract, R.add)
+        fn = R.if_else(R.gt, R.subtract, R.add)
         eq(fn(2)(7), 9)
         eq(fn(2, 7), 9)
         eq(fn(7)(2), 5)
