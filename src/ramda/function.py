@@ -4,7 +4,8 @@ import builtins
 from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
     _pipe, _reduce, _is_array, _is_string, _is_object, _concat
 
-__all__ = ["ap", "always", "curry_n", "curry", "converge", "empty", "identity", "always",
+__all__ = ["ap", "always", "apply", "curry_n", "curry", "converge",
+           "empty", "identity", "always",
            "pipe", "compose", "invoker", "n_ary", "lift_n", "lift"]
 
 
@@ -29,6 +30,11 @@ def ap(apply_f, apply_x):
     print(apply_f, apply_x)
     return _reduce(
         lambda acc, f: _concat(acc, map(f, apply_x)), [], apply_f)
+
+
+@_curry2
+def apply(fn, args):
+    return fn(*args)
 
 
 @_curry2

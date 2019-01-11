@@ -39,6 +39,14 @@ def describe_ap():
         eq(isinstance(val, collections.Callable), True)
 
 
+def describe_apply():
+    def it_applies_function_to_argument_list():
+        eq(R.apply(max, [1, 2, 3, -99, 42, 6, 7]), 42)
+
+    def it_is_curried():
+        eq(R.apply(max)([1, 2, 3, -99, 42, 6, 7]), 42)
+
+
 def describe_curry_n():
     @pytest.fixture
     def source():
