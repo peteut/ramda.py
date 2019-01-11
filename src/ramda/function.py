@@ -2,11 +2,9 @@ import inspect
 import collections
 import builtins
 from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
-    _pipe, _reduce, _is_array, _is_string, _is_object, _concat, _xmap, \
-    _dispatchable
+    _pipe, _reduce, _is_array, _is_string, _is_object, _concat
 
-
-__all__ = ["ap", "always", "curry_n", "converge", "empty", "identity", "always",
+__all__ = ["ap", "always", "curry_n", "curry", "converge", "empty", "identity", "always",
            "pipe", "compose", "invoker", "n_ary", "lift_n", "lift"]
 
 
@@ -38,6 +36,11 @@ def curry_n(length, fn):
     if length == 1:
         return _curry1(fn)
     return _arity(length, _curry_n(length, [], fn))
+
+
+@_curry1
+def curry(fn):
+    return curry_n(_get_arity(fn), fn)
 
 
 @_curry2

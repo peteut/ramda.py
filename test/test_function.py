@@ -64,6 +64,68 @@ def describe_curry_n():
         eq(curried(1, 2, 3), 6)
 
 
+def describe_curry():
+    def it_curries_a_single_value():
+        f = R.curry(lambda a, b, c, d: (a + b * c) / d)
+        g = f(12)
+        eq(g(3, 6, 2), 15)
+
+    def it_curries_multiple_values():
+        f = R.curry(lambda a, b, c, d: (a + b * c) / d)
+        g = f(12, 3)
+        eq(g(6, 2), 15)
+        h = f(12, 3, 6)
+        eq(h(2), 15)
+
+    def it_allows_further_currying_of_a_curried_function():
+        f = R.curry(lambda a, b, c, d: (a + b * c) / d)
+        g = f(12)
+        eq(g(3, 6, 2), 15)
+        h = g(3)
+        eq(h(6, 2), 15)
+        eq(g(3, 6)(2), 15)
+
+    def it_properly_reports_the_length_of_the_curried_function():
+        f = R.curry(lambda a, b, c, d: (a + b * c) / d)
+        eq(get_arity(f), 4)
+        g = f(12)
+        eq(get_arity(g), 3)
+        h = g(3)
+        eq(get_arity(h), 2)
+        eq(get_arity(g(3, 6)), 1)
+
+    def it_supports_R___placeholder():
+        def f(a, b, c):
+            return [a, b, c]
+
+        g = R.curry(f)
+        _ = R.__
+
+        eq(g(1)(2)(3), [1, 2, 3])
+        eq(g(1)(2, 3), [1, 2, 3])
+        eq(g(1, 2)(3), [1, 2, 3])
+        eq(g(1, 2, 3), [1, 2, 3])
+
+        eq(g(_, 2, 3)(1), [1, 2, 3])
+        eq(g(1, _, 3)(2), [1, 2, 3])
+        eq(g(1, 2, _)(3), [1, 2, 3])
+
+        eq(g(1, _, _)(2)(3), [1, 2, 3])
+        eq(g(_, 2, _)(1)(3), [1, 2, 3])
+        eq(g(_, _, 3)(1)(2), [1, 2, 3])
+
+        eq(g(1, _, _)(2, 3), [1, 2, 3])
+        eq(g(_, 2, _)(1, 3), [1, 2, 3])
+        eq(g(_, _, 3)(1, 2), [1, 2, 3])
+
+        eq(g(1, _, _)(_, 3)(2), [1, 2, 3])
+        eq(g(_, 2, _)(_, 3)(1), [1, 2, 3])
+        eq(g(_, _, 3)(_, 2)(1), [1, 2, 3])
+
+        eq(g(_, _, _)(_, _)(_)(1, 2, 3), [1, 2, 3])
+        eq(g(_, _, _)(1, _, _)(_, _)(2, _)(_)(3), [1, 2, 3])
+
+
 @pytest.mark.skip()
 def describe_add_index():
     @pytest.fixture
@@ -333,15 +395,15 @@ def describe_lift_n():
 def describe_lift():
     @pytest.fixture
     def add3():
-        return lambda a, b, c: a + b + c
+        return R.curry(lambda a, b, c: a + b + c)
 
     @pytest.fixture
     def add4():
-        return lambda a, b, c, d: a + b + c + d
+        return R.curry(lambda a, b, c, d: a + b + c + d)
 
     @pytest.fixture
     def add5():
-        return lambda a, b, c, d, e: a + b + c + d + e
+        return R.curry(lambda a, b, c, d, e: a + b + c + d + e)
 
     @pytest.fixture
     def madd3(add3):
