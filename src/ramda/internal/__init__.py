@@ -19,8 +19,8 @@ def _assign(target, *args):
 
 
 def _keys(obj):
-    return obj.keys() if isinstance(obj, collections.Mapping) else \
-        [idx for idx in range(len(obj))] if isinstance(obj, collections.Sequence) else \
+    return obj.keys() if _is_object(obj) else \
+        [idx for idx in range(len(obj))] if _is_seq(obj) else \
         []
 
 
@@ -42,13 +42,17 @@ def _identical(a, b):
 
 
 def _has(prop, obj):
-    if isinstance(obj, collections.Mapping):
+    if _is_object(obj):
         return prop in obj
     try:
         obj[prop]
         return True
     except IndexError:
         return False
+
+
+def _is_function(x):
+    return isinstance(x, collections.Callable)
 
 
 def _equals(a, b, stack_a=[], stack_b=[]):
@@ -58,21 +62,21 @@ def _equals(a, b, stack_a=[], stack_b=[]):
         return False
     if a is None or b is None:
         return False
-    if isinstance(getattr(a, "equals", None), collections.Callable) or \
-            isinstance(getattr(b, "equals", None), collections.Callable):
-        return isinstance(getattr(a, "equals", None), collections.Callable) and \
+    if _is_function(getattr(a, "equals", None)) or \
+            _is_function(getattr(b, "equals", None)):
+        return _is_function(getattr(a, "equals", None)) and \
             a.equals(b) and \
-            isinstance(getattr(b, "equals", None), collections.Callable) and \
+            _is_function(getattr(b, "equals", None)) and \
             b.equals(a)
     if isinstance(a, (int, float, str)):
         if not (type(a) == type(b) and _identical(a, b)):
             return False
-    if isinstance(a, collections.Callable) and isinstance(b, collections.Callable):
+    if _is_function(a) and _is_function(b):
         return id(a) == id(b)
     keys_a = _keys(a)
     if len(keys_a) != len(_keys(b)):
         return False
-    for item_a, item_b in builtins.reversed(builtins.list(builtins.zip(stack_a, stack_b))):
+    for item_a, item_b in reversed(list(builtins.zip(stack_a, stack_b))):
         if id(item_a) == id(a):
             return id(item_b) == id(b)
     stack_a.append(a)
@@ -196,7 +200,7 @@ def _curry_n(length, received, fn):
         left = length
         while len(combined) < len(received) or len(args_list):
             if len(combined) < len(received) and \
-                    (not _is_placeholder(received[len(combined)]) or
+                    (not _is_placeholder(received[len(combined)]) or \
                      len(args_list) == 0):
                 result = received[len(combined)]
             else:
@@ -245,11 +249,11 @@ def _reduce(fn, acc, xs):
         return xf._transducer_result(
             getattr(obj, method_name)(xf._transducer_step, acc))
 
-    if isinstance(fn, collections.Callable):
+    if _is_function(fn):
         fn = _xwrap(fn)
 
-    if isinstance(xs, collections.Mapping) and isinstance(
-            getattr(xs, "reduce", None), collections.Callable):
+    if isinstance(xs, collections.Mapping) and _is_function(
+            getattr(xs, "reduce", None)):
         return _method_reduce(fn, acc, xs, "reduce")
 
     if isinstance(xs, collections.Iterable):
@@ -366,8 +370,7 @@ def _xfilter(f, xf):
 
 
 def _is_transformer(obj):
-    return isinstance(
-        getattr(obj, "_transducer_step", None), collections.Callable)
+    return _is_function(getattr(obj, "_transducer_step", None))
 
 
 def _identity(x):
@@ -382,7 +385,7 @@ def _dispatchable(method_names, xf, fn):
             return fn()
         obj = args[-1]
         for method_name in method_names:
-            if isinstance(getattr(obj, method_name, None), collections.Callable):
+            if _is_function(getattr(obj, method_name, None)):
                 return getattr(obj, method_name)(*args[:-1])
         if _is_transformer(obj):
             transducer = xf(*args[:-1])
@@ -405,17 +408,16 @@ def _step_cat(obj):
     _step_cat_obj = types.SimpleNamespace(
         _transducer_init=lambda: {},
         _transducer_step=lambda result, input: _assign(
-            result, dict([input[:2]]) if not isinstance(
-                input, collections.Mapping) else input),
+            result, dict([input[:2]]) if not _is_object(input) else input),
         _transducer_result=_identity)
 
     if _is_transformer(obj):
         return obj
-    elif isinstance(obj, collections.Mapping):
+    elif _is_object(obj):
         return _step_cat_obj
     elif isinstance(obj, str):
         return _step_cat_string
-    elif isinstance(obj, collections.Iterable):
+    elif _is_seq(obj):
         return _step_cat_array
 
     raise ValueError("Cannot create transformer for {}".format(obj))
@@ -429,7 +431,7 @@ def _check_for_method(method_name, fn):
             return fn()
         obj = args[-1]
         if not hasattr(obj, method_name) or \
-                not isinstance(getattr(obj, method_name), collections.Callable):
+                not _is_function(getattr(obj, method_name)):
             return fn(*args)
         return getattr(obj, method_name)(*args[:-1])
     return _fn
@@ -538,7 +540,7 @@ def _make_flat(recursive):
     def flatt(xs):
         result = []
         for item in xs:
-            if isinstance(item, collections.Sequence):
+            if _is_seq(item):
                 value = flatt(item) if recursive else item
                 result += value
             else:
@@ -845,8 +847,12 @@ def _is_object(x):
     return isinstance(x, collections.Mapping)
 
 
+def _is_seq(x):
+    return isinstance(x, collections.Sequence)
+
+
 def _is_array(x):
-    return isinstance(x, collections.Sequence) and not isinstance(x, str)
+    return _is_seq(x) and not isinstance(x, str)
 
 
 def _is_string(x):

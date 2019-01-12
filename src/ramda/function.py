@@ -1,8 +1,7 @@
-import inspect
-import collections
 import builtins
 from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
-    _pipe, _reduce, _is_array, _is_string, _is_object, _concat, _get_arity
+    _pipe, _reduce, _is_array, _is_string, _is_object, _concat, _get_arity, \
+    _is_function
 
 __all__ = ["ap", "always", "apply", "curry_n", "curry", "converge",
            "empty", "identity", "always",
@@ -18,9 +17,9 @@ def always(val):
 def ap(apply_f, apply_x):
     from .list import map
 
-    if isinstance(getattr(apply_f, "ap", None), collections.Callable):
+    if _is_function(getattr(apply_f, "ap", None)):
         return apply_f.ap(apply_x)
-    if isinstance(apply_f, collections.Callable):
+    if _is_function(apply_f):
         return lambda x: apply_f(x)(apply_x(x))
 
     print(apply_f, apply_x)
@@ -58,9 +57,9 @@ def converge(after, fns):
 
 @_curry1
 def empty(x):
-    if isinstance(getattr(x, "empty", None), collections.Callable):
+    if _is_function(getattr(x, "empty", None)):
         return x.empty()
-    elif isinstance(x, collections.Callable):
+    elif _is_function(x):
         return lambda _: None
     elif _is_array(x):
         return []
@@ -97,7 +96,7 @@ def compose(*args):
 def invoker(arity, method):
     def fn(*args):
         target = args[arity] if len(args) > arity else None
-        if target and isinstance(getattr(target, method, None), collections.Callable):
+        if target and _is_function(getattr(target, method, None)):
             return getattr(target, method)(*args[:arity])
         raise TypeError("{} does not have a method named \"{}\"".format(
             target, method))
@@ -134,7 +133,7 @@ def n_ary(n, fn):
         return lambda a0=None, a1=None, a2=None, a3=None, a4=None, a5=None, a6=None, \
             a7=None, a8=None, a9=None: fn(a0, a1, a2, a3, a4, a5, a6, a7, a8, a9)
     raise ValueError(
-        "First argument to nAry must be a non-negative integer no greater than ten")
+        "First argument to n_ary must be a non-negative integer no greater than ten")
 
 
 @_curry2

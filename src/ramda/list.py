@@ -1,5 +1,4 @@
 import inspect
-import collections
 import copy
 import functools
 import itertools
@@ -10,7 +9,8 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _xtake, _curry_n, _xreduce_by, _reduced, _xany, _xaperture, _aperture, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
     _xdrop_repeats_with, _equals, _xdrop_while, _xfind, _xfind_index, _xfind_last, \
-    _xfind_last_index, _index_of, _complement, _is_number
+    _xfind_last_index, _index_of, _complement, _is_number, _is_function, \
+    _is_seq, _is_object
 from .function import curry_n, invoker, converge
 
 
@@ -50,8 +50,8 @@ def any(fn, xs):
 
 @_curry2
 def concat(a, b):
-    if isinstance(a, collections.Sequence):
-        if isinstance(b, collections.Sequence):
+    if _is_seq(a):
+        if _is_seq(b):
             return a + b
         raise TypeError("{} is not an array".format(b))
     if hasattr(a, "concat"):
@@ -62,11 +62,11 @@ def concat(a, b):
 @_curry2
 @_dispatchable(["map"], _xmap)
 def map(fn, functor):
-    if isinstance(functor, collections.Callable):
+    if _is_function(functor):
         return curry_n(
             len(inspect.signature(functor).parameters),
             lambda *args: fn(functor(*args)))
-    elif isinstance(functor, collections.Mapping):
+    elif _is_object(functor):
         return functools.reduce(
             lambda acc, key: acc.update({key: fn(functor[key])}) or acc,
             functor.keys(), {})
@@ -77,7 +77,7 @@ def map(fn, functor):
 @_curry2
 @_dispatchable(["filter"], _xfilter)
 def filter(pred, filterable):
-    if isinstance(filterable, collections.Mapping):
+    if _is_object(filterable):
         def _fn(acc, key):
             if pred(filterable[key]):
                 acc[key] = filterable[key]
@@ -138,7 +138,7 @@ def append(el, xs):
 @_curry2
 @_dispatchable(["chain"], _xchain)
 def chain(fn, monad):
-    if isinstance(monad, collections.Callable):
+    if _is_function(monad):
         return lambda x: fn(monad(x))(x)
     return _make_flat(False)(map(fn, monad))
 
@@ -329,9 +329,9 @@ def last_index_of(target, xs):
 
 @_curry1
 def length(xs):
-    return len(xs) if isinstance(xs, collections.Sequence) \
+    return len(xs) if _is_seq(xs) \
         else len(inspect.signature(xs).parameters) \
-        if isinstance(xs, collections.Callable) \
+        if _is_function(xs) \
         else xs.length if hasattr(xs, "length") and isinstance(xs.length, int) \
         else float("nan")
 
