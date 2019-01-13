@@ -260,3 +260,51 @@ def describe_when():
         if_is_number = R.when(R.is_(int))
         eq(if_is_number(R.add(1))(15), 16)
         eq(if_is_number(R.add(1))("hello"), "hello")
+
+
+def describe_both():
+    @pytest.fixture
+    def even():
+        return lambda x: x % 2 == 0
+
+    @pytest.fixture
+    def gt10():
+        return lambda x: x > 10
+
+    @pytest.fixture
+    def between():
+        return lambda a, b, c: a < b and b < c
+
+    @pytest.fixture
+    def total20():
+        return lambda a, b, c: a + b + c == 20
+
+    def it_combines_two_boolean_returning_fns_into_one(even, gt10):
+        f = R.both(even, gt10)
+        eq(f(8), False)
+        eq(f(13), False)
+        eq(f(14), True)
+
+    def it_accepts_fns_that_take_multiple_parameters(between, total20):
+        f = R.both(between, total20)
+        eq(f(4, 5, 11), True)
+        eq(f(12, 2, 6), False)
+        eq(f(5, 6, 15), False)
+
+    def it_does_short_circuit():
+        def f():
+            return False
+
+        effect = "not evaluated"
+
+        def z():
+            nonlocal effect
+            effect = "Z got evaluated"
+
+        R.both(f, z)()
+        eq(effect, 'not evaluated')
+
+    def it_is_curried(even, gt10):
+        even_and = R.both(even)
+        eq(even_and(gt10)(11), False)
+        eq(even_and(gt10)(12), True)

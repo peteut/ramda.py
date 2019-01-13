@@ -1,7 +1,9 @@
 from .internal import _curry1, _curry2, _curry3, _arity
-from .function import empty, curry_n
-from .internal import _equals, _get_arity, _fix_arity
-__all__ = ["all_pass", "any_pass", "lt", "if_else", "gt", "cond", "and_",
+from .function import empty, curry_n, lift
+from .internal import _equals, _get_arity, _fix_arity, _is_function
+
+
+__all__ = ["all_pass", "any_pass", "and_", "lt", "gt", "both", "if_else", "cond",
            "or_", "not_", "is_empty", "until", "when"]
 
 
@@ -20,6 +22,9 @@ def any_pass(preds):
                    lambda *args: any(map(lambda p: p(*args), fixed_preds))
                    if len(preds) else False)
 
+@_curry2
+def and_(a, b):
+    return a and b
 
 @_curry2
 def lt(a, b):
@@ -29,6 +34,22 @@ def lt(a, b):
 @_curry2
 def gt(a, b):
     return a > b
+
+
+@_curry2
+def or_(a, b):
+    return a or b
+
+
+@_curry1
+def not_(a):
+    return not a
+
+
+@_curry2
+def both(f, g):
+    return lambda *args: f(*args) and g(*args) if _is_function(f) else \
+        lift(and_)(f, g)
 
 
 @_curry3
@@ -48,21 +69,6 @@ def cond(pairs):
             if (pred(*args)):
                 return fn(*args)
     return _arity(arity, do)
-
-
-@_curry2
-def and_(a, b):
-    return a and b
-
-
-@_curry2
-def or_(a, b):
-    return a or b
-
-
-@_curry1
-def not_(a):
-    return not a
 
 
 @_curry1
