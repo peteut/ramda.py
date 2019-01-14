@@ -3,8 +3,8 @@ from .function import empty, curry_n, lift
 from .internal import _equals, _get_arity, _fix_arity, _is_function
 
 
-__all__ = ["all_pass", "any_pass", "and_", "lt", "gt", "both", "if_else", "cond",
-           "or_", "not_", "is_empty", "until", "when"]
+__all__ = ["all_pass", "any_pass", "and_", "lt", "gt", "both", "complement",
+           "if_else", "cond", "or_", "not_", "is_empty", "until", "when"]
 
 
 @_curry1
@@ -22,9 +22,11 @@ def any_pass(preds):
                    lambda *args: any(map(lambda p: p(*args), fixed_preds))
                    if len(preds) else False)
 
+
 @_curry2
 def and_(a, b):
     return a and b
+
 
 @_curry2
 def lt(a, b):
@@ -50,6 +52,9 @@ def not_(a):
 def both(f, g):
     return lambda *args: f(*args) and g(*args) if _is_function(f) else \
         lift(and_)(f, g)
+
+
+complement = lift(not_)
 
 
 @_curry3

@@ -25,6 +25,16 @@ def plus_eq():
     return lambda w, x, y, z: w + x == y + z
 
 
+@pytest.fixture
+def even():
+    return lambda x: x % 2 == 0
+
+
+@pytest.fixture
+def between():
+    return lambda a, b, c: a < b and b < c
+
+
 def describe_all_pass():
     def it_reports_wheter_all_preds_are_satified(odd, lt20, gt5):
         ok = R.all_pass([odd, lt20, gt5])
@@ -264,16 +274,8 @@ def describe_when():
 
 def describe_both():
     @pytest.fixture
-    def even():
-        return lambda x: x % 2 == 0
-
-    @pytest.fixture
     def gt10():
         return lambda x: x > 10
-
-    @pytest.fixture
-    def between():
-        return lambda a, b, c: a < b and b < c
 
     @pytest.fixture
     def total20():
@@ -308,3 +310,15 @@ def describe_both():
         even_and = R.both(even)
         eq(even_and(gt10)(11), False)
         eq(even_and(gt10)(12), True)
+
+
+def describe_complement():
+    def it_creates_boolean_returning_fn_that_reversed_another(even):
+        f = R.complement(even)
+        eq(f(8), False)
+        eq(f(13), True)
+
+    def it_accepts_a_function_that_take_multiple_parameters(between):
+        f = R.complement(between)
+        eq(f(4, 5, 11), False)
+        eq(f(12, 2, 6), True)
