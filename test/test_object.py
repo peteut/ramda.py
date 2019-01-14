@@ -32,3 +32,31 @@ def describe_pick_by():
     def it_is_curried(T, obj):
         copier = R.pick_by(T)
         eq(copier(obj), obj)
+
+
+def describe_path():
+    @pytest.fixture
+    def deep_object():
+        return {"a": {"b": {"c": "c"}}}
+
+    def it_takes_a_path_and_an_obj_and_returns_the_value_at_the_path_or_none():
+        obj = {
+            "a": {
+                "b": {
+                    "c": 100,
+                    "d": 200
+                },
+                "e": {
+                    "f": [100, 101, 102],
+                    "g": "G"
+                },
+                "h": "H"
+            },
+            "i": "I",
+            "j": ["J"]
+        }
+        eq(R.path(["a", "b", "c"], obj), 100)
+        eq(R.path([], obj), obj)
+        eq(R.path(["a", "e", "f", 1], obj), 101)
+        eq(R.path(["j", 0], obj), "J")
+        eq(R.path(["j", 1], obj), None)
