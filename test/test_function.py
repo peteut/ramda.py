@@ -438,3 +438,18 @@ def describe_lift():
         eq(madd3([1, 10], [2], [3]), [6, 15])
         eq(madd4([1, 10], [2], [3], [40]), [46, 55])
         eq(madd5([1, 10], [2], [3], [40], [500, 1000]), [546, 1046, 555, 1055])
+
+
+def describe_flip():
+    @pytest.fixture
+    def f():
+        return lambda a, b, c: " ".join([a, b, c])
+
+    def it_returns_a_fn_which_inverts_the_first_two_args_to_the_supplied_fn(f):
+        g = R.flip(f)
+        eq(f("a", "b", "c"), "a b c")
+        eq(g("a", "b", "c"), "b a c")
+
+    def it_returns_a_curried_fn(f):
+        g = R.flip(f)("a")
+        eq(g("b", "c"), "b a c")

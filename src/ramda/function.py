@@ -5,7 +5,8 @@ from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
 
 __all__ = ["ap", "always", "apply", "curry_n", "curry", "converge",
            "empty", "identity", "always",
-           "pipe", "compose", "invoker", "n_ary", "lift_n", "lift"]
+           "pipe", "compose", "invoker", "n_ary", "lift_n", "lift",
+           "flip"]
 
 
 @_curry1
@@ -149,3 +150,9 @@ def lift_n(arity, fn):
 @_curry1
 def lift(fn):
     return lift_n(_get_arity(fn), fn)
+
+
+@_curry1
+def flip(fn):
+    return curry_n(
+        _get_arity(fn), lambda *args: fn(args[1], args[0], *args[2:]))
