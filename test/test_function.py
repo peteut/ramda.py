@@ -19,7 +19,7 @@ def describe_ap():
     def it_interprets_a_as_an_applicative(mult2, plus3):
         eq(R.ap([mult2, plus3], [1, 2, 3]), [2, 4, 6, 4, 5, 6])
 
-    def it_interprets_function_as_an_applicative():
+    def it_interprets_fn_as_an_applicative():
         def f(r):
             return lambda a: r + a
 
@@ -40,7 +40,7 @@ def describe_ap():
 
 
 def describe_apply():
-    def it_applies_function_to_argument_list():
+    def it_applies_fn_to_arg_list():
         eq(R.apply(max, [1, 2, 3, -99, 42, 6, 7]), 42)
 
     def it_is_curried():
@@ -85,7 +85,7 @@ def describe_curry():
         h = f(12, 3, 6)
         eq(h(2), 15)
 
-    def it_allows_further_currying_of_a_curried_function():
+    def it_allows_further_currying_of_a_curried_fn():
         f = R.curry(lambda a, b, c, d: (a + b * c) / d)
         g = f(12)
         eq(g(3, 6, 2), 15)
@@ -93,7 +93,7 @@ def describe_curry():
         eq(h(6, 2), 15)
         eq(g(3, 6)(2), 15)
 
-    def it_properly_reports_the_length_of_the_curried_function():
+    def it_properly_reports_the_length_of_the_curried_fn():
         f = R.curry(lambda a, b, c, d: (a + b * c) / d)
         eq(get_arity(f), 4)
         g = f(12)
@@ -140,7 +140,7 @@ def describe_add_index():
     def map_indexed():
         return R.add_index(R.map)
 
-    def describe_un_ary_functions_like_map():
+    def describe_un_ary_fns_like_map():
         # def times2(x) = lambda x: x * 2
         # add_index_param = lambda x, idx: x + idx
         pass
@@ -171,20 +171,20 @@ def describe_converge():
                           [lambda a: a,
                            lambda a, b, c: c])
 
-    def it_passes_the_results_of_applying_the_arguments_individually_to_two_separate_functions_into_a_single_one(mult):  # noqa
+    def it_passes_the_results_of_applying_the_args_individually_to_two_separate_fns_into_a_single_one(mult):  # noqa
         # mult(add1(2), add3(2)) = mult(3, 5) = 3 * 15
         eq(R.converge(mult, [R.add(1), R.add(3)])(2), 15)
 
-    def it_returns_a_function_with_the_length_of_the_longest_argument(f1, f2, f3):
+    def it_returns_a_fn_with_the_length_of_the_longest_arg(f1, f2, f3):
         eq(get_arity(f1), 1)
         eq(get_arity(f2), 2)
         eq(get_arity(f3), 3)
 
-    def it_returns_a_curried_function(f2, f3):
+    def it_returns_a_curried_fn(f2, f3):
         eq(f2(6)(7), 42)
         eq(get_arity(f3(R.__)), 3)
 
-    def it_works_with_empty_functions_list():
+    def it_works_with_empty_fns_list():
         fn = R.converge(lambda: 0, [])
         eq(get_arity(fn), 0)
         eq(fn(), 0)
@@ -212,7 +212,7 @@ def describe_empty():
         eq(isinstance(R.empty(Nothing()), Nothing), True)
         eq(isinstance(R.empty(Just(123)), Nothing), True)
 
-    def it_dispatches_to_empty_function_on_constructor(just):
+    def it_dispatches_to_empty_fn_on_constructor(just):
         class Nothing:
             pass
         Nothing.empty = staticmethod(lambda: Nothing())
@@ -236,23 +236,23 @@ def describe_empty():
 
 
 def describe_pipe():
-    def it_is_a_variadic_function():
+    def it_is_a_variadic_fn():
         eq(inspect.isfunction(R.pipe), True)
         eq(inspect.getargspec(R.pipe).args, [])
 
-    def it_performs_left_to_right_function_composition():
+    def it_performs_left_to_right_fn_composition():
         f = R.pipe(lambda x, base: int(x, base), R.multiply, R.map)
 
         eq(get_arity(f), 2)
         eq(f("10", 10)([1, 2, 3]), [10, 20, 30])
         eq(f("10", 2)([1, 2, 3]), [2, 4, 6])
 
-    def it_throws_if_given_no_arguments():
+    def it_throws_if_given_no_args():
         with pytest.raises(ValueError,
-                           message="pipe requires at least one argument"):
+                           message="pipe requires at least one arg"):
             R.pipe()
 
-    def it_can_be_applied_to_one_argument():
+    def it_can_be_applied_to_one_arg():
         f = lambda a, b, c: [a, b, c]
         g = R.pipe(f)
         eq(get_arity(g), 3)
@@ -260,23 +260,23 @@ def describe_pipe():
 
 
 def describe_compose():
-    def is_a_variadic_function():
+    def is_a_variadic_fn():
         eq(inspect.isfunction(R.compose), True)
         eq(inspect.getargspec(R.compose).args, [])
 
-    def it_performs_right_to_left_function_composition():
+    def it_performs_right_to_left_fn_composition():
         f = R.compose(R.map, R.multiply, lambda x, base: int(x, base))
 
         eq(get_arity(f), 2)
         eq(f("10", 10)([1, 2, 3]), [10, 20, 30])
         eq(f("10", 2)([1, 2, 3]), [2, 4, 6])
 
-    def it_throws_if_given_no_arguments():
+    def it_throws_if_given_no_args():
         with pytest.raises(ValueError,
-                           message="compose requires at least one argument"):
+                           message="compose requires at least one arg"):
             R.compose()
 
-    def it_can_be_applied_to_one_argument():
+    def it_can_be_applied_to_one_arg():
         f = lambda a, b, c: [a, b, c]
         g = R.compose(f)
         eq(get_arity(g), 3)
@@ -292,7 +292,7 @@ def describe_invoker():
     def add2():
         return R.invoker(1, "__add__")
 
-    def it_return_a_function_with_correct_arity(concat2):
+    def it_return_a_fn_with_correct_arity(concat2):
         eq(get_arity(concat2), 3)
 
     def it_calls_the_method_on_the_object(add2):
@@ -321,25 +321,25 @@ def describe_n_ary():
     def to_array():
         return lambda *args: list(args)
 
-    def it_turns_multiple_argument_function_into_a_nullary_one(to_array):
+    def it_turns_multiple_arg_fn_into_a_nullary_one(to_array):
         fn = R.n_ary(0, to_array)
         eq(get_arity(fn), 0)
         # eq(fn(1, 2, 3), [])
 
-    def it_turns_multiple_argument_function_into_a_ternary_one(to_array):
+    def it_turns_multiple_arg_fn_into_a_ternary_one(to_array):
         fn = R.n_ary(3, to_array)
         eq(get_arity(fn), 3)
         # eq(fn(1, 2, 3, 4), [1, 2, 3])
         eq(fn(1), [1, None, None])
 
-    def it_creates_functions_of_arity_less_than_or_equal_to_ten(to_array):
+    def it_creates_fns_of_arity_less_than_or_equal_to_ten(to_array):
         fn = R.n_ary(10, to_array)
         eq(get_arity(fn), 10)
         eq(fn(*R.range(0, 10)), R.range(0, 10))
 
     def it_throws_if_n_is_greater_than_ten():
         with pytest.raises(ValueError,
-                           message="First argument to n_ary must be a non-negative "
+                           message="First arg to n_ary must be a non-negative "
                            "integer no greater than ten"):
             R.n_ary(11, lambda: None)
 
@@ -365,13 +365,13 @@ def describe_lift_n():
     def add_n5(add_n):
         return R.lift_n(5, add_n)
 
-    def it_returna_a_function(add3):
+    def it_returna_a_fn(add3):
         eq(isinstance(R.lift_n(3, add3), collections.Callable), True)
 
-    def it_limits_a_variadic_function_to_the_specified_arity(add_n3):
+    def it_limits_a_variadic_fn_to_the_specified_arity(add_n3):
         eq(add_n3([1, 10], [2], [3]), [6, 15])
 
-    def it_can_lift_functions_of_any_arity(add_n3, add_n4, add_n5):
+    def it_can_lift_fns_of_any_arity(add_n3, add_n4, add_n5):
         eq(add_n3([1, 10], [2], [3]), [6, 15])
         eq(add_n4([1, 10], [2], [3], [40]), [46, 55])
         eq(add_n5([1, 10], [2], [3], [40], [500, 1000]), [546, 1046, 555, 1055])
@@ -425,7 +425,7 @@ def describe_lift():
     def madd5(add5):
         return R.lift(add5)
 
-    def it_returns_a_function_if_called_with_just_a_function():
+    def it_returns_a_fn_if_called_with_just_a_fn():
         eq(isinstance(R.lift(R.add), collections.Callable), True)
 
     def it_produces_a_cross_product_of_list_values(madd3):
@@ -434,7 +434,7 @@ def describe_lift():
         eq(madd3([1], [2], [3]), [6])
         eq(madd3([1, 2], [3, 4], [5, 6]), [9, 10, 10, 11, 10, 11, 11, 12])
 
-    def it_can_lift_functions_of_any_arity(madd3, madd4, madd5):
+    def it_can_lift_fns_of_any_arity(madd3, madd4, madd5):
         eq(madd3([1, 10], [2], [3]), [6, 15])
         eq(madd4([1, 10], [2], [3], [40]), [46, 55])
         eq(madd5([1, 10], [2], [3], [40], [500, 1000]), [546, 1046, 555, 1055])

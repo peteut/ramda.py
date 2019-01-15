@@ -1,10 +1,9 @@
-from inspect import signature
 import types
 import collections
+from ramda.internal import _get_arity
 
 
-def get_arity(fn):
-    return len(signature(fn).parameters)
+get_arity = _get_arity
 
 
 list_xf = types.SimpleNamespace(

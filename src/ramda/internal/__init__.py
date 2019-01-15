@@ -20,8 +20,7 @@ def _assign(target, *args):
 
 def _keys(obj):
     return obj.keys() if _is_object(obj) else \
-        [idx for idx in range(len(obj))] if _is_seq(obj) else \
-        []
+        [idx for idx in range(len(obj))] if _is_seq(obj) else []
 
 
 def _get_arity(fn):
@@ -200,7 +199,7 @@ def _curry_n(length, received, fn):
         left = length
         while len(combined) < len(received) or len(args_list):
             if len(combined) < len(received) and \
-                    (not _is_placeholder(received[len(combined)]) or \
+                    (not _is_placeholder(received[len(combined)]) or
                      len(args_list) == 0):
                 result = received[len(combined)]
             else:
