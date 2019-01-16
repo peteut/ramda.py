@@ -251,11 +251,11 @@ def _reduce(fn, acc, xs):
     if _is_function(fn):
         fn = _xwrap(fn)
 
-    if _is_seq(xs) and _is_function(
+    if _is_object(xs) and _is_function(
             getattr(xs, "reduce", None)):
         return _method_reduce(fn, acc, xs, "reduce")
 
-    if _is_seq(xs):
+    if isinstance(xs, collections.Iterable):
         return _iterable_reduce(fn, acc, xs)
 
     raise ValueError("reduce: xs must be an iterable")
@@ -856,3 +856,7 @@ def _is_array(x):
 
 def _is_string(x):
     return isinstance(x, str)
+
+
+def _of(x):
+    return [x]

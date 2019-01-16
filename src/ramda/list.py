@@ -10,7 +10,7 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _concat, _make_flat, _xchain, _contains, _xdrop, _xdrop_last, _xdrop_last_while, \
     _xdrop_repeats_with, _equals, _xdrop_while, _xfind, _xfind_index, _xfind_last, \
     _xfind_last_index, _index_of, _complement, _is_number, _is_function, \
-    _is_seq, _is_object
+    _is_seq, _is_object, _of
 from .function import curry_n, invoker, converge
 
 
@@ -22,7 +22,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
            "none", "pair", "prepend", "juxt", "range", "reject", "partition",
-           "nth", "head"]
+           "nth", "head", "of"]
 
 
 @_curry3
@@ -396,3 +396,5 @@ def range(from_, to):
 
 
 head = nth(0)
+
+of = _curry1(_of)

@@ -1746,3 +1746,11 @@ def describe_head():
     def it_throws_if_applied_to_none():
         with pytest.raises(TypeError):
             R.head(None)
+
+
+def describe_of():
+    def it_returns_its_arg_as_a_list():
+        eq(R.of(100), [100])
+        eq(R.of([100]), [[100]])
+        eq(R.of(None), [None])
+        eq(R.of([]), [[]])
