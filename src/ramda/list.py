@@ -21,7 +21,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "flatten", "for_each", "from_pairs", "group_by", "group_with", "index_by",
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
-           "none", "pair", "juxt", "range", "reject", "partition",
+           "none", "pair", "prepend", "juxt", "range", "reject", "partition",
            "nth", "head"]
 
 
@@ -368,6 +368,11 @@ none = _curry2(_complement(any))
 @_curry2
 def pair(fst, snd):
     return [fst, snd]
+
+
+@_curry2
+def prepend(el, xs):
+    return _concat([el], xs)
 
 
 @_curry1

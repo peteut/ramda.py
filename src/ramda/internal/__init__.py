@@ -251,11 +251,11 @@ def _reduce(fn, acc, xs):
     if _is_function(fn):
         fn = _xwrap(fn)
 
-    if isinstance(xs, collections.Mapping) and _is_function(
+    if _is_seq(xs) and _is_function(
             getattr(xs, "reduce", None)):
         return _method_reduce(fn, acc, xs, "reduce")
 
-    if isinstance(xs, collections.Iterable):
+    if _is_seq(xs):
         return _iterable_reduce(fn, acc, xs)
 
     raise ValueError("reduce: xs must be an iterable")
