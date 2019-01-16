@@ -3,7 +3,7 @@ from .internal import _curry1, _curry2, _curry_n, _arity, _identity, \
     _pipe, _reduce, _is_array, _is_string, _is_object, _concat, _get_arity, \
     _is_function
 
-__all__ = ["ap", "always", "apply", "curry_n", "curry", "converge",
+__all__ = ["ap", "always", "apply", "unapply", "curry_n", "curry", "converge",
            "empty", "identity", "always",
            "pipe", "compose", "invoker", "n_ary", "lift_n", "lift",
            "flip", "juxt"]
@@ -31,6 +31,11 @@ def ap(apply_f, apply_x):
 @_curry2
 def apply(fn, args):
     return fn(*args)
+
+
+@_curry1
+def unapply(fn):
+    return lambda *args: fn(args)
 
 
 @_curry2
