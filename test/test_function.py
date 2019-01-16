@@ -453,3 +453,46 @@ def describe_flip():
     def it_returns_a_curried_fn(f):
         g = R.flip(f)("a")
         eq(g("b", "c"), "b a c")
+
+
+@pytest.mark.skip()
+def describe_juxt():
+    @pytest.fixture
+    def hello():
+        return lambda _: "hello"
+
+    @pytest.fixture
+    def bye():
+        return lambda _: "bye"
+
+    def it_works_with_no_fns_and_no_values():
+        eq(R.juxt([])(), [])
+
+    def it_works_with_no_fns_and_some_values():
+        eq(R.juxt([])(2, 3), [])
+
+    def it_works_with_1_fn_and_no_values(hello):
+        eq(R.juxt([hello])(), ["hello"])
+
+    def it_works_with_1_fn_and_1_value():
+        eq(R.juxt([R.add(3)])(2), [5])
+
+    def it_works_with_1_fn_and_some_values():
+        eq(R.juxt([R.multiply])(2, 3), [6])
+
+    def it_works_with_some_fns_and_no_values(hello, bye):
+        eq(R.juxt([hello, bye])(), ["hello", "bye"])
+
+    def it_works_with_some_fns_and_1_value():
+        eq(R.juxt([R.multiply(2), R.add(3)])(2), [4, 5])
+
+    def it_works_with_some_fns_and_some_values():
+        eq(R.juxt([R.add, R.multiply])(2, 3), [5, 6])
+
+    def it_retains_the_highest_arity(true):
+        t = R.always(True)
+        f = R.juxt([R.n_ary(1, t), R.n_ary(3, t), R.n_ary(2, t)])
+        eq(f.length, 3)
+
+    def it_returns_a_curried_function():
+        eq(R.juxt([R.multiply, R.add])(2)(3), [6, 5])
