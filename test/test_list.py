@@ -1754,3 +1754,16 @@ def describe_of():
         eq(R.of([100]), [[100]])
         eq(R.of(None), [None])
         eq(R.of([]), [[]])
+
+
+def describe_prepend():
+    def it_adds_the_element_to_the_beginning_of_the_list():
+        eq(R.prepend("x", ["y", "z"]), ["x", "y", "z"])
+        eq(R.prepend(["a", "z"], ["x", "y"]), [["a", "z"], "x", "y"])
+
+    def it_works_on_empty_list():
+        eq(R.prepend(1, []), [1])
+
+    def it_is_curried():
+        eq(isinstance(R.prepend(4), collections.Callable), True)
+        eq(R.prepend(4)([3, 2, 1]), [4, 3, 2, 1])
