@@ -98,7 +98,7 @@ def _curry1(fn):
         if len(args) == 0:
             return f1
         else:
-            a, = args
+            a = args[0]
             return f1 if _is_placeholder(a) else fn(a)
     return f1
 

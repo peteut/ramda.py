@@ -504,3 +504,13 @@ def describe_of():
         eq(R.of([100]), [[100]])
         eq(R.of(None), [None])
         eq(R.of([]), [[]])
+
+
+def describe_identity():
+    def it_returns_its_first_arg():
+        eq(R.identity(None), None)
+        eq(R.identity("foo"), "foo")
+        eq(R.identity("foo", "bar"), "foo")
+
+    def it_has_length_1():
+        eq(get_arity(R.identity), 1)
