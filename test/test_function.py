@@ -496,3 +496,11 @@ def describe_juxt():
 
     def it_returns_a_curried_function():
         eq(R.juxt([R.multiply, R.add])(2)(3), [6, 5])
+
+
+def describe_of():
+    def it_returns_its_arg_as_a_list():
+        eq(R.of(100), [100])
+        eq(R.of([100]), [[100]])
+        eq(R.of(None), [None])
+        eq(R.of([]), [[]])

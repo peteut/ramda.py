@@ -1748,14 +1748,6 @@ def describe_head():
             R.head(None)
 
 
-def describe_of():
-    def it_returns_its_arg_as_a_list():
-        eq(R.of(100), [100])
-        eq(R.of([100]), [[100]])
-        eq(R.of(None), [None])
-        eq(R.of([]), [[]])
-
-
 def describe_prepend():
     def it_adds_the_element_to_the_beginning_of_the_list():
         eq(R.prepend("x", ["y", "z"]), ["x", "y", "z"])
