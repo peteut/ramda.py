@@ -87,11 +87,6 @@ def pipe(*args):
                   _reduce(_pipe, args[0], tail(args)))
 
 
-@_curry2
-def pluck(p, xs):
-    pass
-
-
 def compose(*args):
     if len(args) == 0:
         raise ValueError("compose requires at least one argument")
