@@ -1759,3 +1759,16 @@ def describe_prepend():
     def it_is_curried():
         eq(isinstance(R.prepend(4), collections.Callable), True)
         eq(R.prepend(4)([3, 2, 1]), [4, 3, 2, 1])
+
+
+def describe_pluck():
+    @pytest.fixture
+    def people():
+        return [{"name": "Fred", "age": 23},
+                {"name": "Wilma", "age": 21},
+                {"name": "Pebbles", "age": 2}]
+
+    def it_returns_a_fn_that_maps_the_appropriate_property_over_a_list(people):
+        nm = R.pluck("name")
+        eq(inspect.isfunction(nm), True)
+        eq(nm(people), ["Fred", "Wilma", "Pebbles"])

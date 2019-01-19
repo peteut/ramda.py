@@ -12,6 +12,7 @@ from .internal import _curry1, _curry2, _curry3, _reduce, _dispatchable, \
     _xfind_last_index, _index_of, _complement, _is_number, _is_function, \
     _is_seq, _is_object
 from .function import curry_n, invoker, converge
+from .object import prop
 
 
 __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", "tail", "take",
@@ -22,7 +23,7 @@ __all__ = ["adjust", "filter", "all", "any", "concat", "map", "reduce", "into", 
            "index_of", "init", "insert", "insert_all", "intersperse", "join", "last",
            "last_index_of", "length", "map_accum", "map_accum_right", "merge_all",
            "none", "pair", "prepend", "juxt", "range", "reject", "partition",
-           "nth", "head"]
+           "nth", "head", "pluck"]
 
 
 @_curry3
@@ -396,3 +397,8 @@ def range(from_, to):
 
 
 head = nth(0)
+
+
+@_curry2
+def pluck(p, xs):
+    return map(prop(p), xs)
