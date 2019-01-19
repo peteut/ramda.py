@@ -97,7 +97,7 @@ def compose(*args):
 def invoker(arity, method):
     def fn(*args):
         target = args[arity] if len(args) > arity else None
-        if target and _is_function(getattr(target, method, None)):
+        if target is not None and _is_function(getattr(target, method, None)):
             return getattr(target, method)(*args[:arity])
         raise TypeError("{} does not have a method named \"{}\"".format(
             target, method))
