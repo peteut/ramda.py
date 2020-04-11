@@ -1,9 +1,12 @@
-import collections
 import ramda as R
 from ramda.shared import eq
 from .common import get_arity
 import pytest
 
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 
 @pytest.fixture
 def odd():
@@ -157,7 +160,7 @@ def describe_if_else():
 
 def describe_cond():
     def it_returns_a_function():
-        eq(isinstance(R.cond([]), collections.Callable), True)
+        eq(isinstance(R.cond([]), Callable), True)
 
     def it_returns_a_conditional_function():
         fn = R.cond([

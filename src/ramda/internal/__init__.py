@@ -6,6 +6,10 @@ import math
 import inspect
 import fastnumbers
 
+try:
+    from collections.abc import Callable, Iterable, Mapping, Sequence
+except ImportError:
+    from collections import Callable, Iterable, Mapping, Sequence
 
 class _Placeholder():
     pass
@@ -51,7 +55,7 @@ def _has(prop, obj):
 
 
 def _is_function(x):
-    return isinstance(x, collections.Callable)
+    return isinstance(x, Callable)
 
 
 def _equals(a, b, stack_a=[], stack_b=[]):
@@ -255,7 +259,7 @@ def _reduce(fn, acc, xs):
             getattr(xs, "reduce", None)):
         return _method_reduce(fn, acc, xs, "reduce")
 
-    if isinstance(xs, collections.Iterable):
+    if isinstance(xs, Iterable):
         return _iterable_reduce(fn, acc, xs)
 
     raise ValueError("reduce: xs must be an iterable")
@@ -576,7 +580,7 @@ def _xcat(xf):
 
         def _transducer_step(self, result, input):
             return _reduce(self.rxf, result, [input]) \
-                if not isinstance(input, collections.Sequence) \
+                if not isinstance(input, Sequence) \
                 else _reduce(self.rxf, result, input)
 
     return _XCat(xf)
@@ -843,11 +847,11 @@ _is_number = functools.partial(fastnumbers.isint, num_only=True)
 
 
 def _is_object(x):
-    return isinstance(x, collections.Mapping)
+    return isinstance(x, Mapping)
 
 
 def _is_seq(x):
-    return isinstance(x, collections.Sequence)
+    return isinstance(x, Sequence)
 
 
 def _is_array(x):

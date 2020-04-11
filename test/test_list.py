@@ -7,6 +7,10 @@ import ramda as R
 from ramda.shared import eq
 from .common import list_xf, get_arity, _is_transformer
 
+try:
+    from collections.abc import Callable, Iterable
+except ImportError:
+    from collections import Callable, Iterable
 
 @pytest.fixture
 def T():
@@ -1659,7 +1663,7 @@ def describe_partition():
 
     @pytest.fixture
     def is_empty():
-        return lambda arg: isinstance(arg, collections.Iterable) and len(arg) == 0
+        return lambda arg: isinstance(arg, Iterable) and len(arg) == 0
 
     def it_splits_a_list_into_two_lists_according_to_a_predicate(even):
         eq(R.partition(even, []), [[], []])
@@ -1757,7 +1761,7 @@ def describe_prepend():
         eq(R.prepend(1, []), [1])
 
     def it_is_curried():
-        eq(isinstance(R.prepend(4), collections.Callable), True)
+        eq(isinstance(R.prepend(4), Callable), True)
         eq(R.prepend(4)([3, 2, 1]), [4, 3, 2, 1])
 
 
