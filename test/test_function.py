@@ -1,11 +1,14 @@
 import inspect
 import types
-import collections
 import pytest
 import ramda as R
 from ramda.shared import eq
 from .common import get_arity
 
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 
 def describe_ap():
     @pytest.fixture
@@ -36,7 +39,7 @@ def describe_ap():
 
     def it_is_curried(mult2, plus3):
         val = R.ap([mult2, plus3])
-        eq(isinstance(val, collections.Callable), True)
+        eq(isinstance(val, Callable), True)
 
 
 def describe_apply():
@@ -366,7 +369,7 @@ def describe_lift_n():
         return R.lift_n(5, add_n)
 
     def it_returna_a_fn(add3):
-        eq(isinstance(R.lift_n(3, add3), collections.Callable), True)
+        eq(isinstance(R.lift_n(3, add3), Callable), True)
 
     def it_limits_a_variadic_fn_to_the_specified_arity(add_n3):
         eq(add_n3([1, 10], [2], [3]), [6, 15])
@@ -378,7 +381,7 @@ def describe_lift_n():
 
     def it_is_curried(add_n):
         f4 = R.lift_n(4)
-        eq(isinstance(f4, collections.Callable), True)
+        eq(isinstance(f4, Callable), True)
         eq(f4(add_n)([1], [2], [3], [4, 5]), [10, 11])
 
     def it_interprets_list_as_a_functor(add_n3):
@@ -391,8 +394,8 @@ def describe_lift_n():
     def it_interprets_fn_as_a_functor(add_n3):
         converged_on_int = add_n3(R.add(2), R.multiply(3), R.subtract(4))
         converged_on_bool = R.lift_n(2, R.and_)(R.gt(R.__, 0), R.lt(R.__, 3))
-        eq(isinstance(converged_on_int, collections.Callable), True)
-        eq(isinstance(converged_on_bool, collections.Callable), True)
+        eq(isinstance(converged_on_int, Callable), True)
+        eq(isinstance(converged_on_bool, Callable), True)
         eq(converged_on_int(10), (10 + 2) + (10 * 3) + (4 - 10))
         eq(converged_on_bool(0), (0 > 0) and (0 < 3))
         eq(converged_on_bool(1), (1 > 0) and (1 < 3))
@@ -426,7 +429,7 @@ def describe_lift():
         return R.lift(add5)
 
     def it_returns_a_fn_if_called_with_just_a_fn():
-        eq(isinstance(R.lift(R.add), collections.Callable), True)
+        eq(isinstance(R.lift(R.add), Callable), True)
 
     def it_produces_a_cross_product_of_list_values(madd3):
         eq(madd3([1, 2, 3], [1, 2], [1, 2, 3]),

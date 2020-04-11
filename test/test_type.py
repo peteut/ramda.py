@@ -1,13 +1,17 @@
-import collections
 import ramda as R
 from ramda.shared import eq
+
+try:
+    from collections.abc import Callable
+except ImportError:
+    from collections import Callable
 
 
 def describe_is():
     def it_works_with_builtin_types():
         eq(R.is_(list, []), True)
         eq(R.is_(bool, False), True)
-        eq(R.is_(collections.Callable, lambda _: _), True)
+        eq(R.is_(Callable, lambda _: _), True)
         eq(R.is_(int, int(0)), True)
         eq(R.is_(object, {}), True)
         eq(R.is_(str, ""), True)
